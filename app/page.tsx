@@ -8,7 +8,7 @@ import type { ActionRenderProps } from '@copilotkit/react-core';
 import { useToast } from '@/hooks/use-toast';
 import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
 import '@copilotkit/react-ui/styles.css';
-import { CopilotKitCSSProperties, RenderSuggestionsListProps } from "@copilotkit/react-ui";
+import { CopilotKitCSSProperties, RenderSuggestionsListProps, InputProps } from "@copilotkit/react-ui";
  
 import { useInterviewState } from '@/hooks/use-interview-state';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -172,24 +172,120 @@ Final Instructions:
 // =============================================================================
 
 // Custom Suggestions List Component
-const CustomSuggestionsList = ({ suggestions, onSuggestionClick }: RenderSuggestionsListProps) => {
+const CustomSuggestionsList = ({ onSuggestionClick }: RenderSuggestionsListProps) => {
+  const helperSuggestions = [
+    {
+      title: 'Hint',
+      message: 'Give me a subtle hint about the current question without revealing the full answer.'
+    },
+    {
+      title: 'Real-Life Example',
+      message: 'Provide a real-life example that demonstrates the concept in this question.'
+    },
+    {
+      title: 'Explain Concept',
+      message: 'Explain the concept behind this question in simple terms.'
+    },
+    {
+      title: 'Step-by-Step',
+      message: 'Guide me step-by-step toward the correct answer.'
+    },
+    {
+      title: 'Common Mistakes',
+      message: 'Tell me common mistakes people make in such questions.'
+    }
+  ];
+
+  const contextSuggestions = [
+    {
+      title: 'Provide Question',
+      message: 'Here is the exact question I am working on: '
+    },
+    {
+      title: 'Language/Subject',
+      message: 'The language or subject for this question is: '
+    },
+    {
+      title: 'What I Tried',
+      message: 'What I have tried so far: '
+    }
+  ];
+
   return (
-    <div className="suggestions flex flex-col gap-2 p-4">
-      <h1>Try asking:</h1>
-      <div className="flex gap-2">
-        {suggestions.map((suggestion, index) => (
+    <div className="suggestions flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
+      <h2 className="font-semibold text-gray-700">Quick Help:</h2>
+      <div className="flex flex-wrap gap-2">
+        {helperSuggestions.map((suggestion, index) => (
           <Button
             key={index}
-            className="rounded-md border border-gray-500 bg-white px-2 py-1 shadow-md text-gray-700 hover:bg-gray-100"
+            className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
             onClick={() => onSuggestionClick(suggestion.message)}
           >
-            {suggestion.title || suggestion.message}
+            {suggestion.title}
+          </Button>
+        ))}
+      </div>
+
+      <h2 className="font-semibold text-gray-700 mt-2">Provide Context:</h2>
+      <div className="flex flex-wrap gap-2">
+        {contextSuggestions.map((suggestion, index) => (
+          <Button
+            key={`ctx-${index}`}
+            className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
+            onClick={() => onSuggestionClick(suggestion.message)}
+          >
+            {suggestion.title}
           </Button>
         ))}
       </div>
     </div>
   );
 };
+
+// Custom Input Component for Copilot popup/chat
+function CustomInput({ inProgress, onSend, isVisible }: InputProps) {
+  const handleSubmit = (value: string) => {
+    if (value && value.trim().length > 0) {
+      onSend(value);
+    }
+  };
+
+  const wrapperStyle = "flex gap-2 p-4 border-t";
+  const inputStyle = "flex-1 p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500 disabled:bg-gray-100";
+  const buttonStyle = "px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed";
+
+  if (!isVisible) return null;
+
+  return (
+    <div className={wrapperStyle}>
+      <input
+        disabled={inProgress}
+        type="text"
+        placeholder="Ask your question here..."
+        className={inputStyle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            const value = (e.currentTarget as HTMLInputElement).value;
+            handleSubmit(value);
+            (e.currentTarget as HTMLInputElement).value = '';
+          }
+        }}
+      />
+      <button
+        disabled={inProgress}
+        className={buttonStyle}
+        onClick={(e) => {
+          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+          const value = input?.value || '';
+          handleSubmit(value);
+          if (input) input.value = '';
+        }}
+      >
+        Ask
+      </button>
+    </div>
+  );
+}
 
 // =============================================================================
 // Main App Component
@@ -795,7 +891,8 @@ export default function InterviewApp() {
                             <div
                               className="w-full gemini-chat copilot-chat-container"
                             >
-                              <CopilotChat
+                              <CopilotChat Input={CustomInput} 
+                              RenderSuggestionsList={CustomSuggestionsList}
                                 instructions={interviewerInstructions}
                                 labels={{
                                   title: `${selectedLanguage} Interviewer`,
@@ -803,7 +900,6 @@ export default function InterviewApp() {
                                   placeholder: "Your answer...",
                                 }}
                                 className="w-full"
-                                RenderSuggestionsList={CustomSuggestionsList}
                               />
                             </div>
                           </div>
@@ -839,7 +935,7 @@ export default function InterviewApp() {
             }
           >
             <CopilotKit runtimeUrl='/api/copilotkit'>
-              <CopilotPopup 
+              <CopilotPopup  RenderSuggestionsList={CustomSuggestionsList}
               instructions={ASSISTANT_PROMPT}
               labels={{
                 title: `${selectedLanguage} Interview Assistant`,
@@ -847,7 +943,7 @@ export default function InterviewApp() {
                 placeholder: 'Ask for hints, explanations, or help...',
               }}
               defaultOpen={isPopupOpen}
-              RenderSuggestionsList={CustomSuggestionsList}
+                Input={CustomInput}
             />
             </CopilotKit>
           </div>
