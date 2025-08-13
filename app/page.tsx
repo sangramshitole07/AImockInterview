@@ -860,7 +860,7 @@ export default function InterviewApp() {
               } as CopilotKitCSSProperties
             }
           >
-            <CopilotKit runtimeUrl="/api/copilotkit">
+            <CopilotKit runtimeUrl='/api/copilotkit'>
             <CopilotPopup 
               instructions={ASSISTANT_PROMPT}
               labels={{
@@ -879,7 +879,8 @@ Just ask me for help with any question you're working on!`,
               }}
               defaultOpen={isPopupOpen}
               RenderSuggestionsList={CustomSuggestionsList}
-            /></CopilotKit>
+            />
+            </CopilotKit>
           </div>
           
         )}
