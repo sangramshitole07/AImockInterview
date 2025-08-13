@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom CopilotChat styling for Gemini-like appearance */
+@layer components {
+  /* CopilotChat container styling */
+  .copilot-chat-container {
+    @apply bg-white rounded-2xl shadow-2xl border border-gray-200;
+  }
+  
+  /* Chat messages styling */
+  .copilot-chat-messages {
+    @apply space-y-6 p-6 bg-gradient-to-b from-gray-50/30 to-white;
+  }
+  
+  .copilot-chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .copilot-chat-messages::-webkit-scrollbar-track {
+    background: #F7FAFC;
+    border-radius: 3px;
+  }
+  
+  .copilot-chat-messages::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+    border-radius: 3px;
+  }
+  
+  .copilot-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #A0AEC0;
+  }
+  
+  /* User message styling */
+  .copilot-chat-user-message {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 ml-auto max-w-[85%] shadow-sm;
+  }
+  
+  /* Assistant message styling */
+  .copilot-chat-assistant-message {
+    @apply bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-md px-4 py-3 mr-auto max-w-[85%] shadow-sm;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Code block styling within messages */
+  .copilot-chat-assistant-message pre {
+    @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  
+  .copilot-chat-assistant-message code {
+    @apply bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm;
+  }
+  
+  .copilot-chat-assistant-message pre code {
+    @apply bg-transparent text-gray-100 p-0;
+  }
+  
+  /* Input area styling */
+  .copilot-chat-input {
+    @apply border-t border-gray-200 p-6 bg-white;
+  }
+  
+  /* Input field styling */
+  .copilot-chat-input-field {
+    @apply w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none;
+  }
+  
+  /* Send button styling */
+  .copilot-chat-send-button {
+    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl px-4 py-2 hover:from-blue-600 hover:to-purple-700 transition-all duration-200;
+  }
+  
+  /* Header styling */
+  .copilot-chat-header {
+    @apply bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 px-6 py-4;
+    flex-shrink: 0;
+  }
+  
+  /* Message avatars */
+  .copilot-chat-avatar {
+    @apply w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0;
+  }
+  
+  .copilot-chat-user-avatar {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+  }
+  
+  .copilot-chat-assistant-avatar {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white;
+  }
+  
+  /* Smooth scrolling for all chat elements */
+  .copilot-chat-container * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Message content styling for better text flow */
+  .copilot-chat-message-content {
+    line-height: 1.6;
+    word-spacing: 0.1em;
+  }
+  
+  /* Ensure proper spacing for code blocks */
+  .copilot-chat-message-content pre {
+    margin: 1rem 0;
+  }
+  
+  .copilot-chat-message-content p {
+    margin: 0.5rem 0;
+  }
+  
+  .copilot-chat-message-content ul,
+  .copilot-chat-message-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  /* Improved scrolling performance */
+  .copilot-chat-messages {
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+    will-change: scroll-position;
+  }
+  
+  /* Prevent layout shifts during content loading */
+  .copilot-chat-message {
+    contain: layout style paint;
+  }
+
+  /* Gemini-like scrollbar styling */
+  .gemini-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E0 #F7FAFC;
+    scroll-behavior: smooth;
+  }
+  
+  .gemini-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .gemini-scrollbar::-webkit-scrollbar-track {
+    background: #F7FAFC;
+    border-radius: 3px;
+  }
+  
+  .gemini-scrollbar::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .gemini-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #A0AEC0;
+  }
+
+  /* Smooth animations for messages */
+  .message-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  /* Gemini chat code block constraints to avoid overflow */
+  .gemini-chat pre {
+    max-height: none;
+    overflow: visible;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .gemini-chat code {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Ensure the chat container layouts allow scrolling */
+  .copilot-chat-container {
+    display: block;
+  }
+  
+  .message-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  
+  .message-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .message-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Typing indicator animation */
+  .typing-dot {
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  
+  .typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  
+  .typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+  
+  @keyframes typing {
+    0%, 80%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
