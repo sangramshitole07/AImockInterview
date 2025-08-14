@@ -15,7 +15,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { CopilotSuggestions } from '@/components/CopilotSuggestions'; // Assuming this is correct
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen } from 'lucide-react';
+import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info } from 'lucide-react';
 
 // =============================================================================
 // AI Prompts
@@ -1224,8 +1224,12 @@ export default function InterviewApp() {
                               className="w-full gemini-chat copilot-chat-container"
                             >
                               {/* Guidance Banner */}
-                              <div className="mb-3 mx-3 mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                                Tip: Use the A/B/C/D buttons to submit an answer for scoring. Use the help chips for hints and explanations. Click Evaluate for a detailed rationale, or Next Question to proceed.
+                              <div className="mb-3 mx-3 mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 flex items-start gap-2">
+                                <Info className="w-4 h-4 mt-0.5 text-blue-700" />
+                                <div>
+                                  <div className="font-medium">How to use this chat</div>
+                                  <div className="text-blue-800/90">Use A/B/C/D to submit answers for scoring. Use the chips for hints and explanations. Click Evaluate for a detailed rationale, or Next Question to proceed.</div>
+                                </div>
                               </div>
                               <CopilotChat
                                 instructions={interviewerInstructions}
