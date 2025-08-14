@@ -8,7 +8,7 @@ import type { ActionRenderProps } from '@copilotkit/react-core';
 import { useToast } from '@/hooks/use-toast';
 import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
 import '@copilotkit/react-ui/styles.css';
-import { CopilotKitCSSProperties, RenderSuggestionsListProps, InputProps } from "@copilotkit/react-ui";
+import { CopilotKitCSSProperties, RenderSuggestionsListProps, InputProps, RenderSuggestion, useCopilotChatSuggestions } from "@copilotkit/react-ui";
  
 import { useInterviewState } from '@/hooks/use-interview-state';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -26,12 +26,18 @@ const INTERVIEWER_PROMPT = `You are an expert AI Interviewer, embodying the capa
 
 ---
 **Core Instructions & Persona:**
+- **Language**: Respond in English only.
 - **Initial State**: When the user first selects a programming language/subject, your immediate next response MUST be to politely ask them to **rate their current proficiency level** in that language/subject on a scale of 1 to 10 (where 1 is beginner and 10 is expert). This self-rating will help you tailor the interview difficulty. DO NOT ask any technical questions before receiving this self-rating.
 - **Interviewer Role**: Once the user provides their self-rating, you will act as a seasoned technical interviewer for the selected language/subject. Your tone should be professional, insightful, and encouraging, fostering a positive learning environment.
  - **Pacing & Flow**: Ask precisely one question at a time. Maintain a natural conversational flow. Await the user's complete answer before generating your next response.
  - **Evaluation & Feedback (CRITICAL - SIMPLE TEXT ONLY)**: After each answer, reply in this exact minimal plain-text format, without headings, lists, or emojis:
 
     Score: [NUM]/10. Feedback: [one to two concise sentences].
+
+- **When to Evaluate vs Assist (MANDATORY):**
+  - If the user's message starts with "Answer:" or is a single choice letter (A, B, C, or D), you MUST evaluate using the scoring format above.
+  - If the user's message starts with "ASSIST:" or otherwise requests help (e.g., hint, explanation, step-by-step, edge cases, complexity), DO NOT score. Provide a detailed, supportive response addressing the request until doubts are resolved.
+  - Never score or evaluate any ASSIST request. Only score explicit answers.
 
 - **Adaptive Difficulty**: Questions should dynamically adapt. Based on the user's initial self-rating and their performance on previous questions (scores), adjust the difficulty.
     - If the user performs well (score >= 7), gradually increase the complexity to "Medium" or "Hard" for the next question.
@@ -130,11 +136,13 @@ const ASSISTANT_PROMPT = `You are an AI Interview Assistant, designed to be a he
 
 ---
 Core Instructions & Persona:
+- Language: Respond in English only.
 - Assistant Role: You are a supportive guide. Your persona is friendly, encouraging, and focused on facilitating learning.
 - Context Awareness (CRITICAL): You will receive the exact text of the current question the Interviewer is asking (if available), as well as the selectedLanguage/Subject for the interview. Use this to provide highly relevant and personalized help.
 - Guidance Principle: Help the user understand how to think about the problem. Provide conceptual clarity, analogies, or related examples without giving the direct answer.
 - Safe Answers: If asked for the direct answer, politely decline and offer a hint or clarification instead.
 - No Interviewing: Do not ask interview questions yourself. You are a supportive assistant.
+ - Response Behavior: Always respond to the user's help request first (e.g., hint, explanation, example). Never evaluate or score the user's answer. Do not use any scoring formats.
 
 ---
 Output and Formatting Policy (MANDATORY):
@@ -171,71 +179,160 @@ Final Instructions:
 // Custom Components (Moved here for clarity and self-containment)
 // =============================================================================
 
-// Custom Suggestions List Component
-const CustomSuggestionsList = ({ onSuggestionClick }: RenderSuggestionsListProps) => {
+// Custom Suggestions List Component (Popup only)
+const CustomSuggestionsList = ({ suggestions = [], onSuggestionClick }: RenderSuggestionsListProps) => {
+  const wrap = (m: string) =>
+    `Assistant request: Reply as the interview assistant. Do not evaluate or score the user's answer. Provide a detailed plain-text response. ${m}`;
   const helperSuggestions = [
-    {
-      title: 'Hint',
-      message: 'Give me a subtle hint about the current question without revealing the full answer.'
-    },
-    {
-      title: 'Real-Life Example',
-      message: 'Provide a real-life example that demonstrates the concept in this question.'
-    },
-    {
-      title: 'Explain Concept',
-      message: 'Explain the concept behind this question in simple terms.'
-    },
-    {
-      title: 'Step-by-Step',
-      message: 'Guide me step-by-step toward the correct answer.'
-    },
-    {
-      title: 'Common Mistakes',
-      message: 'Tell me common mistakes people make in such questions.'
-    }
+    { title: 'Hint', message: 'Give a subtle hint about the current question without revealing the final answer. Nudge me toward the key idea.' },
+    { title: 'Approach Outline', message: 'Provide a detailed approach in plain text: overview, steps, why each step works, and when to apply it. Do not give the final code.' },
+    { title: 'Step-by-Step', message: 'Guide me step-by-step toward the answer. Explain each step clearly and state why it is necessary. Avoid giving the final answer.' },
+    { title: 'Explain Concept', message: 'Explain the underlying concept in plain text with a simple analogy and a tiny plain-text example.' },
+    { title: 'Real-Life Example', message: 'Give a practical real-life example that maps to this problem and explain how the mapping helps solve it.' },
+    { title: 'Edge Cases', message: 'List important edge cases in plain text and how to handle each one. Explain why each edge case matters.' },
+    { title: 'Complexity & Trade-offs', message: 'Analyze time and space complexity for a simple approach and an optimized approach. Explain the trade-offs and when to use each.' },
+    { title: 'Debugging Tips', message: 'Suggest targeted debugging checks and common failure points for this type of problem. Mention what each check reveals.' },
+    { title: 'Test Cases', message: 'Propose a small set of high-signal test cases as plain text (inputs and expected outputs) to validate a solution.' },
+    { title: 'Compare Solutions', message: 'Compare two viable approaches and explain pros, cons, and selection criteria.' },
+    { title: 'Optimize Solution', message: 'Assume a baseline solution exists. Suggest concrete optimizations and explain their impact and risks.' },
+    { title: 'Constraints Review', message: 'Ask me to confirm constraints and assumptions and explain how they affect the solution approach.' }
   ];
 
   const contextSuggestions = [
-    {
-      title: 'Provide Question',
-      message: 'Here is the exact question I am working on: '
-    },
-    {
-      title: 'Language/Subject',
-      message: 'The language or subject for this question is: '
-    },
-    {
-      title: 'What I Tried',
-      message: 'What I have tried so far: '
-    }
+    { title: 'Provide Question', message: 'Here is the exact question I am working on: ' },
+    { title: 'Language/Subject', message: 'The language or subject for this question is: ' },
+    { title: 'What I Tried', message: 'What I have tried so far: ' },
+    { title: 'Constraints', message: 'Key constraints and assumptions are: ' },
+    { title: 'Environment', message: 'My environment/framework/tools are: ' },
+    { title: 'Error Message', message: 'The error message I am seeing is: ' },
+    { title: 'Failing Case', message: 'A failing test case (input and expected vs actual) is: ' }
   ];
 
   return (
     <div className="suggestions flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
+      {Array.isArray(suggestions) && suggestions.length > 0 && (
+        <>
+          <h2 className="font-semibold text-gray-700">Suggested:</h2>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((suggestion, index) => (
+              <RenderSuggestion
+                key={`dyn-${index}`}
+                title={suggestion.title}
+                message={suggestion.message}
+                partial={suggestion.partial}
+                className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
+                onClick={() => onSuggestionClick(wrap(suggestion.message))}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
       <h2 className="font-semibold text-gray-700">Quick Help:</h2>
       <div className="flex flex-wrap gap-2">
         {helperSuggestions.map((suggestion, index) => (
-          <Button
-            key={index}
+          <RenderSuggestion
+            key={`help-${index}`}
+            title={suggestion.title}
+            message={suggestion.message}
+            partial={false}
             className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
-            onClick={() => onSuggestionClick(suggestion.message)}
-          >
-            {suggestion.title}
-          </Button>
+            onClick={() => onSuggestionClick(wrap(suggestion.message))}
+          />
         ))}
       </div>
 
       <h2 className="font-semibold text-gray-700 mt-2">Provide Context:</h2>
       <div className="flex flex-wrap gap-2">
         {contextSuggestions.map((suggestion, index) => (
-          <Button
+          <RenderSuggestion
             key={`ctx-${index}`}
+            title={suggestion.title}
+            message={suggestion.message}
+            partial={false}
             className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
+            onClick={() => onSuggestionClick(wrap(suggestion.message))}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Suggestions list for CopilotChat (no assistant wrapping)
+const ChatSuggestionsList = ({ suggestions = [], onSuggestionClick }: RenderSuggestionsListProps) => {
+  const helperSuggestions = [
+    { title: 'Ask for a Hint', message: 'ASSIST: In English only: Could you give me a subtle hint without revealing the full answer?' },
+    { title: 'Approach Outline', message: 'ASSIST: In English only: Provide a practical approach outline with steps and why each step matters.' },
+    { title: 'Explain Concept', message: 'ASSIST: In English only: Please explain the core concept involved here in simple terms.' },
+    { title: 'Step-by-Step', message: 'ASSIST: In English only: Can you guide me step-by-step on how to approach this?' },
+    { title: 'Edge Cases', message: 'ASSIST: In English only: What edge cases should I consider for this problem?' },
+    { title: 'Debugging Tips', message: 'ASSIST: In English only: Suggest targeted debugging tips and common pitfalls to check.' },
+    { title: 'Test Cases', message: 'ASSIST: In English only: Propose a few high-signal test cases with expected outputs.' },
+    { title: 'Compare Solutions', message: 'ASSIST: In English only: Compare two viable approaches and when to pick each.' },
+    { title: 'Optimize Solution', message: 'ASSIST: In English only: Suggest concrete optimizations and their trade-offs.' },
+    { title: 'Real-Life Example', message: 'ASSIST: In English only: Provide a real-life analogy that maps to this problem.' },
+    { title: 'Common Mistakes', message: 'ASSIST: In English only: What are common mistakes and how can I avoid them?' },
+    { title: 'Pseudocode', message: 'ASSIST: In English only: Provide brief pseudocode to clarify the approach.' },
+    { title: 'Visualize Flow', message: 'ASSIST: In English only: Describe the control/data flow to visualize the solution.' },
+    { title: 'Complexity', message: 'ASSIST: In English only: What is the expected time and space complexity for an optimal solution?' },
+  ];
+
+  const contextSuggestions = [
+    { title: 'Provide Question', message: 'ASSIST: In English only: Here is the exact question I am working on: ' },
+    { title: 'What I Tried', message: 'ASSIST: In English only: What I have tried so far: ' },
+    { title: 'Error Message', message: 'ASSIST: In English only: The error I am seeing is: ' },
+    { title: 'Failing Case', message: 'ASSIST: In English only: A failing test case is: ' },
+    { title: 'Clarify Constraints', message: 'ASSIST: In English only: Could you clarify the constraints and assumptions?' },
+    { title: 'Provide Example', message: 'ASSIST: In English only: Can you provide a small example to illustrate the idea?' },
+    { title: 'Compare Approaches', message: 'ASSIST: In English only: How do two common approaches compare, and when should I pick each?' },
+  ];
+
+  return (
+    <div className="suggestions flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
+      {Array.isArray(suggestions) && suggestions.length > 0 && (
+        <>
+          <h2 className="font-semibold text-gray-700">Suggested:</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {suggestions.map((suggestion, index) => (
+              <RenderSuggestion
+                key={`chat-dyn-${index}`}
+                title={suggestion.title}
+                message={suggestion.message}
+                partial={suggestion.partial}
+                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
+                onClick={() => onSuggestionClick(suggestion.message)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      <h2 className="font-semibold text-gray-700">Quick Help:</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {helperSuggestions.map((suggestion, index) => (
+          <RenderSuggestion
+            key={`chat-help-${index}`}
+            title={suggestion.title}
+            message={suggestion.message}
+            partial={false}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
             onClick={() => onSuggestionClick(suggestion.message)}
-          >
-            {suggestion.title}
-          </Button>
+          />
+        ))}
+      </div>
+
+      <h2 className="font-semibold text-gray-700 mt-2">Ask for Context:</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {contextSuggestions.map((suggestion, index) => (
+          <RenderSuggestion
+            key={`chat-ctx-${index}`}
+            title={suggestion.title}
+            message={suggestion.message}
+            partial={false}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
+            onClick={() => onSuggestionClick(suggestion.message)}
+          />
         ))}
       </div>
     </div>
@@ -246,43 +343,262 @@ const CustomSuggestionsList = ({ onSuggestionClick }: RenderSuggestionsListProps
 function CustomInput({ inProgress, onSend, isVisible }: InputProps) {
   const handleSubmit = (value: string) => {
     if (value && value.trim().length > 0) {
+      const wrapped = `Assistant request: Reply as the interview assistant. Respond in English only. Do not evaluate or score the user's answer. Provide a detailed plain-text response. ${value}`;
+      onSend(wrapped);
+    }
+  };
+
+  const wrapperStyle = "flex gap-2 p-4 border-t";
+  const inputStyle = "flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 shadow-sm";
+  const buttonStyle = "px-4 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm transition-transform active:scale-95";
+  const chipStyle = "rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition";
+
+  const helperSuggestions = [
+    { title: 'Hint', message: 'Give a subtle hint about the current question without revealing the final answer. Nudge me toward the key idea.' },
+    { title: 'Approach Outline', message: 'Provide a detailed approach in plain text: overview, steps, why each step works, and when to apply it. Do not give the final code.' },
+    { title: 'Step-by-Step', message: 'Guide me step-by-step toward the answer. Explain each step clearly and state why it is necessary. Avoid giving the final answer.' },
+    { title: 'Explain Concept', message: 'Explain the underlying concept in plain text with a simple analogy and a tiny plain-text example.' },
+    { title: 'Real-Life Example', message: 'Give a practical real-life example that maps to this problem and explain how the mapping helps solve it.' },
+    { title: 'Edge Cases', message: 'List important edge cases in plain text and how to handle each one. Explain why each edge case matters.' },
+    { title: 'Complexity & Trade-offs', message: 'Analyze time and space complexity for a simple approach and an optimized approach. Explain the trade-offs and when to use each.' },
+    { title: 'Debugging Tips', message: 'Suggest targeted debugging checks and common failure points for this type of problem. Mention what each check reveals.' },
+    { title: 'Test Cases', message: 'Propose a small set of high-signal test cases as plain text (inputs and expected outputs) to validate a solution.' },
+    { title: 'Compare Solutions', message: 'Compare two viable approaches and explain pros, cons, and selection criteria.' },
+    { title: 'Optimize Solution', message: 'Assume a baseline solution exists. Suggest concrete optimizations and explain their impact and risks.' },
+    { title: 'Constraints Review', message: 'Ask me to confirm constraints and assumptions and explain how they affect the solution approach.' }
+  ];
+
+  const contextSuggestions = [
+    { title: 'Provide Question', message: 'Here is the exact question I am working on: ' },
+    { title: 'Language/Subject', message: 'The language or subject for this question is: ' },
+    { title: 'What I Tried', message: 'What I have tried so far: ' },
+    { title: 'Constraints', message: 'Key constraints and assumptions are: ' },
+    { title: 'Environment', message: 'My environment/framework/tools are: ' },
+    { title: 'Error Message', message: 'The error message I am seeing is: ' },
+    { title: 'Failing Case', message: 'A failing test case (input and expected vs actual) is: ' }
+  ];
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="flex flex-col">
+      {/* Distinct answer choice buttons for evaluation */}
+      <div className="flex gap-2 px-4 pt-3">
+        {['A','B','C','D'].map((choice) => (
+          <button
+            key={`ans-${choice}`}
+            type="button"
+            className="px-3 py-1 rounded-md text-white text-sm shadow-sm border-2"
+            style={{
+              background: choice === 'A' ? '#1f2937' : choice === 'B' ? '#0f766e' : choice === 'C' ? '#7c2d12' : '#111827',
+              borderColor: choice === 'A' ? '#60a5fa' : choice === 'B' ? '#34d399' : choice === 'C' ? '#fbbf24' : '#f87171'
+            }}
+            disabled={inProgress}
+            onClick={() => handleSubmit(`Answer: ${choice}`)}
+          >
+            {choice}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2 px-4 pt-3">
+        {helperSuggestions.map((s, i) => (
+          <button
+            key={`help-${i}`}
+            type="button"
+            className={chipStyle}
+            disabled={inProgress}
+            onClick={() => handleSubmit(s.message)}
+          >
+            {s.title}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1">
+        {contextSuggestions.map((s, i) => (
+          <button
+            key={`ctx-${i}`}
+            type="button"
+            className={chipStyle}
+            disabled={inProgress}
+            onClick={() => handleSubmit(s.message)}
+          >
+            {s.title}
+          </button>
+        ))}
+      </div>
+      <div className={wrapperStyle}>
+        <input
+          disabled={inProgress}
+          type="text"
+          placeholder="Ask your question here..."
+          className={inputStyle}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              const value = (e.currentTarget as HTMLInputElement).value;
+              handleSubmit(value);
+              (e.currentTarget as HTMLInputElement).value = '';
+            }
+          }}
+        />
+        <button
+          disabled={inProgress}
+          className={buttonStyle}
+          onClick={(e) => {
+            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+            const value = input?.value || '';
+            handleSubmit(value);
+            if (input) input.value = '';
+          }}
+        >
+          Ask
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Input for CopilotChat (no assistant wrapping, suggestions to guide learning)
+function InterviewerChatInput({ inProgress, onSend, isVisible }: InputProps) {
+  const handleSubmit = (value: string) => {
+    if (value && value.trim().length > 0) {
       onSend(value);
     }
   };
 
   const wrapperStyle = "flex gap-2 p-4 border-t";
-  const inputStyle = "flex-1 p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500 disabled:bg-gray-100";
-  const buttonStyle = "px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed";
+  const inputStyle = "flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 shadow-sm";
+  const buttonStyle = "px-4 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm transition-transform active:scale-95";
+  const chipStyle = "rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition";
+
+  const helperSuggestions = [
+    { title: 'Hint', message: 'ASSIST: In English only: Could you give me a subtle hint?' },
+    { title: 'Approach Outline', message: 'ASSIST: In English only: Provide a practical approach outline with steps and why each step matters.' },
+    { title: 'Explain Concept', message: 'ASSIST: In English only: Please explain the underlying concept in simple terms.' },
+    { title: 'Step-by-Step', message: 'ASSIST: In English only: Can you break down the approach step-by-step?' },
+    { title: 'Edge Cases', message: 'ASSIST: In English only: What edge cases should I watch out for?' },
+    { title: 'Debugging Tips', message: 'ASSIST: In English only: Suggest targeted debugging tips and common pitfalls to check.' },
+    { title: 'Test Cases', message: 'ASSIST: In English only: Propose a few high-signal test cases with expected outputs.' },
+    { title: 'Compare Solutions', message: 'ASSIST: In English only: Compare two viable approaches and when to pick each.' },
+    { title: 'Optimize Solution', message: 'ASSIST: In English only: Suggest concrete optimizations and their trade-offs.' },
+    { title: 'Real-Life Example', message: 'ASSIST: In English only: Provide a real-life analogy that maps to this problem.' },
+    { title: 'Common Mistakes', message: 'ASSIST: In English only: What are common mistakes and how can I avoid them?' },
+    { title: 'Pseudocode', message: 'ASSIST: In English only: Provide brief pseudocode to clarify the approach.' },
+    { title: 'Visualize Flow', message: 'ASSIST: In English only: Describe the control/data flow to visualize the solution.' },
+    { title: 'Complexity', message: 'ASSIST: In English only: What is the expected time and space complexity?' },
+  ];
+
+  const contextSuggestions = [
+    { title: 'Provide Question', message: 'ASSIST: In English only: Here is the exact question I am working on: ' },
+    { title: 'What I Tried', message: 'ASSIST: In English only: What I have tried so far: ' },
+    { title: 'Error Message', message: 'ASSIST: In English only: The error I am seeing is: ' },
+    { title: 'Failing Case', message: 'ASSIST: In English only: A failing test case is: ' },
+    { title: 'Clarify Constraints', message: 'ASSIST: In English only: Could you clarify the constraints and assumptions?' },
+    { title: 'Provide Example', message: 'ASSIST: In English only: Can you share a small example to illustrate?' },
+    { title: 'Compare Approaches', message: 'ASSIST: In English only: How do different approaches compare here?' },
+  ];
 
   if (!isVisible) return null;
 
   return (
-    <div className={wrapperStyle}>
-      <input
-        disabled={inProgress}
-        type="text"
-        placeholder="Ask your question here..."
-        className={inputStyle}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            const value = (e.currentTarget as HTMLInputElement).value;
+    <div className="flex flex-col">
+      {/* Answer choice buttons with distinct UI for evaluation */}
+      <div className="flex gap-2 px-4 pt-3">
+        {['A','B','C','D'].map((choice) => (
+          <button
+            key={`answer-${choice}`}
+            type="button"
+            className="px-3 py-1 rounded-md text-white text-sm shadow-sm border-2 transition-transform active:scale-95"
+            style={{
+              background: choice === 'A' ? 'linear-gradient(135deg,#3b82f6,#1d4ed8)' : choice === 'B' ? 'linear-gradient(135deg,#10b981,#047857)' : choice === 'C' ? 'linear-gradient(135deg,#f59e0b,#b45309)' : 'linear-gradient(135deg,#ef4444,#991b1b)',
+              borderColor: choice === 'A' ? '#93c5fd' : choice === 'B' ? '#6ee7b7' : choice === 'C' ? '#fcd34d' : '#fca5a5'
+            }}
+            disabled={inProgress}
+            onClick={() => handleSubmit(`Answer: ${choice}`)}
+          >
+            {choice}
+          </button>
+        ))}
+      </div>
+      {/* Action buttons: Evaluate and Next Question */}
+      <div className="flex gap-2 px-4 pt-2">
+        <button
+          type="button"
+          className="px-3 py-1 rounded-md text-white text-sm shadow-sm border-2 transition-transform active:scale-95"
+          style={{
+            background: 'linear-gradient(135deg,#6366f1,#4f46e5)',
+            borderColor: '#a5b4fc'
+          }}
+          disabled={inProgress}
+          onClick={() => handleSubmit('ASSIST: Please EVALUATE my latest answer in detail. Explain the reasoning, why it is correct or wrong, and the full context of the response.')}
+        >
+          Evaluate (Explain)
+        </button>
+        <button
+          type="button"
+          className="px-3 py-1 rounded-md text-white text-sm shadow-sm border-2 transition-transform active:scale-95"
+          style={{
+            background: 'linear-gradient(135deg,#14b8a6,#0d9488)',
+            borderColor: '#5eead4'
+          }}
+          disabled={inProgress}
+          onClick={() => handleSubmit('ASSIST: NEXT QUESTION, please.')}
+        >
+          Next Question
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2 px-4 pt-3">
+        {helperSuggestions.map((s, i) => (
+          <button
+            key={`ich-help-${i}`}
+            type="button"
+            className={chipStyle}
+            disabled={inProgress}
+            onClick={() => handleSubmit(s.message)}
+          >
+            {s.title}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1">
+        {contextSuggestions.map((s, i) => (
+          <button
+            key={`ich-ctx-${i}`}
+            type="button"
+            className={chipStyle}
+            disabled={inProgress}
+            onClick={() => handleSubmit(s.message)}
+          >
+            {s.title}
+          </button>
+        ))}
+      </div>
+      <div className={wrapperStyle}>
+        <input
+          disabled={inProgress}
+          type="text"
+          placeholder="Type your answer or ask for guidance..."
+          className={inputStyle}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              const value = (e.currentTarget as HTMLInputElement).value;
+              handleSubmit(value);
+              (e.currentTarget as HTMLInputElement).value = '';
+            }
+          }}
+        />
+        <button
+          disabled={inProgress}
+          className={buttonStyle}
+          onClick={(e) => {
+            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+            const value = input?.value || '';
             handleSubmit(value);
-            (e.currentTarget as HTMLInputElement).value = '';
-          }
-        }}
-      />
-      <button
-        disabled={inProgress}
-        className={buttonStyle}
-        onClick={(e) => {
-          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-          const value = input?.value || '';
-          handleSubmit(value);
-          if (input) input.value = '';
-        }}
-      >
-        Ask
-      </button>
+            if (input) input.value = '';
+          }}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }
@@ -310,7 +626,7 @@ export default function InterviewApp() {
   // Dynamic interviewer instructions bound to the selected language/subject
   const interviewerInstructions = useMemo(() => {
     const subjectLine = selectedLanguage ? `Selected Subject: ${selectedLanguage}` : 'Selected Subject: (none)';
-    return `${subjectLine}\n\n${INTERVIEWER_PROMPT}`;
+    return `${subjectLine}\n\n${INTERVIEWER_PROMPT}\n\nOperational Rules:\n- If user sends 'Answer: X' (X in A-D) or a single letter A/B/C/D, evaluate and score.\n- If user sends a message starting with 'ASSIST:', provide detailed assistance without scoring (hints, explanations, step-by-step, edge cases, complexity, evaluation rationale on request).\n- On 'ASSIST: NEXT QUESTION', proceed to ask the next question according to the Question Mix Policy.`;
   }, [selectedLanguage]);
 
   // Custom actions for the AI Interviewer
@@ -686,6 +1002,22 @@ export default function InterviewApp() {
   useEffect(() => {
     setHasHydrated(true);
   }, [setHasHydrated]);
+
+  // Dynamic suggestions for the popup chat based on real-time interview state
+  useCopilotChatSuggestions(
+    {
+      instructions:
+        `You are generating plain-text button suggestions for an assistant popup. ` +
+        `The goal is to guide the user toward understanding and a solution with high-signal prompts. ` +
+        `Prefer concise labels that elicit detailed, explanatory responses when clicked. ` +
+        `Examples: Hint, Approach Outline, Step-by-Step, Explain Concept, Real-Life Example, Edge Cases, Complexity & Trade-offs, Debugging Tips, Test Cases, Compare Solutions, Optimize Solution, Constraints Review. ` +
+        `Selected subject: ${selectedLanguage || 'unknown'}. ` +
+        `Incorporate recent performance and progress to tailor the level of detail.`,
+      minSuggestions: 1,
+      maxSuggestions: 3,
+    },
+    [selectedLanguage, responses.length, isInterviewActive, getAverageScore()]
+  );
   
   if (!_hasHydrated) {
     return (
@@ -891,8 +1223,11 @@ export default function InterviewApp() {
                             <div
                               className="w-full gemini-chat copilot-chat-container"
                             >
-                              <CopilotChat Input={CustomInput} 
-                              RenderSuggestionsList={CustomSuggestionsList}
+                              {/* Guidance Banner */}
+                              <div className="mb-3 mx-3 mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                                Tip: Use the A/B/C/D buttons to submit an answer for scoring. Use the help chips for hints and explanations. Click Evaluate for a detailed rationale, or Next Question to proceed.
+                              </div>
+                              <CopilotChat
                                 instructions={interviewerInstructions}
                                 labels={{
                                   title: `${selectedLanguage} Interviewer`,
@@ -900,6 +1235,8 @@ export default function InterviewApp() {
                                   placeholder: "Your answer...",
                                 }}
                                 className="w-full"
+                                Input={InterviewerChatInput}
+                                RenderSuggestionsList={ChatSuggestionsList}
                               />
                             </div>
                           </div>
@@ -935,7 +1272,7 @@ export default function InterviewApp() {
             }
           >
             <CopilotKit runtimeUrl='/api/copilotkit'>
-              <CopilotPopup  RenderSuggestionsList={CustomSuggestionsList}
+              <CopilotPopup  
               instructions={ASSISTANT_PROMPT}
               labels={{
                 title: `${selectedLanguage} Interview Assistant`,
@@ -943,7 +1280,6 @@ export default function InterviewApp() {
                 placeholder: 'Ask for hints, explanations, or help...',
               }}
               defaultOpen={isPopupOpen}
-                Input={CustomInput}
             />
             </CopilotKit>
           </div>
