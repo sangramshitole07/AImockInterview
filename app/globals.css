@@ -43,6 +43,23 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Apple-like theme variables (light) */
+    --apple-bg: #F5F5F7;
+    --apple-card: #FFFFFF;
+    --apple-text: #1C1C1E;
+    --apple-subtext: #3A3A3C;
+    --apple-border: #E5E5EA;
+    --apple-accent: #007AFF;
+    --apple-accent-2: #5856D6;
+
+    /* Chat variables (light) */
+    --chat-bg: var(--apple-bg);
+    --chat-card: var(--apple-card);
+    --chat-text: var(--apple-text);
+    --chat-border: var(--apple-border);
+    --chat-user-bubble: rgba(0,122,255,0.9);
+    --chat-assistant-bubble: var(--apple-card);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -69,6 +86,23 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Apple-like theme variables (dark) */
+    --apple-bg: #1C1C1E;
+    --apple-card: #2C2C2E;
+    --apple-text: #E0E0E0;
+    --apple-subtext: #A0A0A0;
+    --apple-border: #404258;
+    --apple-accent: #0A84FF;
+    --apple-accent-2: #8B5CF6;
+
+    /* Chat variables (dark) */
+    --chat-bg: var(--apple-bg);
+    --chat-card: var(--apple-card);
+    --chat-text: var(--apple-text);
+    --chat-border: var(--apple-border);
+    --chat-user-bubble: rgba(10,132,255,0.9);
+    --chat-assistant-bubble: var(--apple-card);
   }
 }
 
@@ -78,19 +112,24 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 }
 
-/* Custom CopilotChat styling for Gemini-like appearance */
+/* Custom CopilotChat styling - Dark premium UI */
 @layer components {
   /* CopilotChat container styling */
   .copilot-chat-container {
-    @apply bg-white rounded-2xl shadow-2xl border border-gray-200;
+    @apply rounded-2xl;
+    background: var(--chat-bg);
+    border: 1px solid var(--chat-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
   }
   
   /* Chat messages styling */
   .copilot-chat-messages {
-    @apply space-y-6 p-6 bg-gradient-to-b from-gray-50/30 to-white;
+    @apply space-y-6 p-6;
+    background: transparent;
   }
   
   .copilot-chat-messages::-webkit-scrollbar {
@@ -98,65 +137,83 @@
   }
   
   .copilot-chat-messages::-webkit-scrollbar-track {
-    background: #F7FAFC;
+    background: var(--chat-card);
     border-radius: 3px;
   }
   
   .copilot-chat-messages::-webkit-scrollbar-thumb {
-    background: #CBD5E0;
+    background: #6B6F98;
     border-radius: 3px;
   }
   
   .copilot-chat-messages::-webkit-scrollbar-thumb:hover {
-    background: #A0AEC0;
+    background: #6B6F98;
   }
   
   /* User message styling */
   .copilot-chat-user-message {
-    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl rounded-br-md px-4 py-3 ml-auto max-w-[85%] shadow-sm;
+    @apply text-white rounded-2xl rounded-br-md px-4 py-3 ml-auto max-w-[85%] shadow-sm;
+    background: var(--chat-user-bubble);
   }
   
   /* Assistant message styling */
   .copilot-chat-assistant-message {
-    @apply bg-white border border-gray-200 text-gray-800 rounded-2xl rounded-bl-md px-4 py-3 mr-auto max-w-[85%] shadow-sm;
+    @apply rounded-2xl rounded-bl-md px-4 py-3 mr-auto max-w-[85%] shadow-sm;
+    background: var(--chat-assistant-bubble);
+    color: var(--chat-text);
+    border: 1px solid var(--chat-border);
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
   
   /* Code block styling within messages */
   .copilot-chat-assistant-message pre {
-    @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm;
+    @apply rounded-lg p-4 overflow-x-auto text-sm;
+    background: #282C34;
+    color: #ABB2BF;
     max-width: 100%;
     white-space: pre-wrap;
     word-break: break-word;
   }
   
   .copilot-chat-assistant-message code {
-    @apply bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm;
+    @apply px-1 py-0.5 rounded text-sm;
+    background: #404258;
+    color: #E0E0E0;
   }
   
   .copilot-chat-assistant-message pre code {
-    @apply bg-transparent text-gray-100 p-0;
+    @apply bg-transparent p-0;
+    color: #ABB2BF;
   }
   
   /* Input area styling */
   .copilot-chat-input {
-    @apply border-t border-gray-200 p-6 bg-white;
+    @apply p-6;
+    border-top: 1px solid var(--chat-border);
+    background: color-mix(in srgb, var(--chat-bg) 92%, black 8%);
   }
   
   /* Input field styling */
   .copilot-chat-input-field {
-    @apply w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none;
+    @apply w-full rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none;
+    background: transparent;
+    color: var(--chat-text);
+    border: 1px solid var(--chat-border);
   }
   
   /* Send button styling */
   .copilot-chat-send-button {
-    @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl px-4 py-2 hover:from-blue-600 hover:to-purple-700 transition-all duration-200;
+    @apply text-white rounded-xl px-4 py-2 transition-all duration-200;
+    background: linear-gradient(135deg, var(--apple-accent), var(--apple-accent-2));
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--apple-accent) 35%, transparent);
   }
   
   /* Header styling */
   .copilot-chat-header {
-    @apply bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 px-6 py-4;
+    @apply px-6 py-4;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--apple-accent) 12%, transparent), color-mix(in srgb, var(--apple-accent-2) 12%, transparent));
+    border-bottom: 1px solid var(--chat-border);
     flex-shrink: 0;
   }
   
@@ -166,11 +223,13 @@
   }
   
   .copilot-chat-user-avatar {
-    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+    @apply text-white;
+    background: linear-gradient(135deg,#6366F1,#8B5CF6);
   }
   
   .copilot-chat-assistant-avatar {
-    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white;
+    @apply text-white;
+    background: linear-gradient(135deg,#8B5CF6,#A855F7);
   }
   
   /* Smooth scrolling for all chat elements */
@@ -214,7 +273,7 @@
   /* Gemini-like scrollbar styling */
   .gemini-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #CBD5E0 #F7FAFC;
+    scrollbar-color: #6B6F98 var(--chat-card);
     scroll-behavior: smooth;
   }
   
@@ -223,18 +282,18 @@
   }
   
   .gemini-scrollbar::-webkit-scrollbar-track {
-    background: #F7FAFC;
+    background: var(--chat-card);
     border-radius: 3px;
   }
   
   .gemini-scrollbar::-webkit-scrollbar-thumb {
-    background: #CBD5E0;
+    background: #6B6F98;
     border-radius: 3px;
     transition: background-color 0.2s ease;
   }
   
   .gemini-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #A0AEC0;
+    background: #8B8FB8;
   }
 
   /* Smooth animations for messages */
@@ -300,5 +359,28 @@
       transform: scale(1);
       opacity: 1;
     }
+  }
+}
+
+/* Animated background gradient for the app shell */
+@layer utilities {
+  .animated-bg {
+    background: radial-gradient(1200px 800px at 10% 10%, color-mix(in srgb, var(--apple-accent) 15%, transparent), transparent),
+                radial-gradient(1200px 800px at 90% 20%, color-mix(in srgb, var(--apple-accent-2) 12%, transparent), transparent),
+                linear-gradient(180deg, var(--apple-bg), var(--apple-bg));
+    background-size: 200% 200%;
+    animation: bgShift 16s ease-in-out infinite;
+  }
+  .animated-bg-light {
+    background: radial-gradient(1000px 700px at 15% 15%, rgba(0,122,255,0.08), transparent),
+                radial-gradient(900px 600px at 80% 10%, rgba(88,86,214,0.08), transparent),
+                linear-gradient(180deg, #F5F5F7, #F5F5F7);
+    background-size: 200% 200%;
+    animation: bgShift 18s ease-in-out infinite;
+  }
+  @keyframes bgShift {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 0%; }
   }
 }

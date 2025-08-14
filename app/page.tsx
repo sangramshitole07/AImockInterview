@@ -15,7 +15,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { CopilotSuggestions } from '@/components/CopilotSuggestions'; // Assuming this is correct
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen } from 'lucide-react';
+import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info } from 'lucide-react';
 
 // =============================================================================
 // AI Prompts
@@ -621,6 +621,7 @@ export default function InterviewApp() {
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isInterviewerChatOpen, setIsInterviewerChatOpen] = useState(false);
+  const [showTopicSelector, setShowTopicSelector] = useState(false);
   const { toast } = useToast();
 
   // Dynamic interviewer instructions bound to the selected language/subject
@@ -991,6 +992,7 @@ export default function InterviewApp() {
       resetInterview();
       setIsPopupOpen(false);
       setIsInterviewerChatOpen(false);
+      setShowTopicSelector(false);
     } catch (err: any) {
       toast({
         title: 'Reset failed',
@@ -998,6 +1000,22 @@ export default function InterviewApp() {
       });
     }
   }, [resetInterview, toast]);
+
+  const handleChangeTopic = useCallback((newLanguage: string) => {
+    try {
+      startInterview(newLanguage);
+      setShowTopicSelector(false);
+      toast({
+        title: 'Topic Changed',
+        description: `Switched to ${newLanguage} interview`,
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Unable to change topic',
+        description: err?.message || 'Unknown error occurred',
+      });
+    }
+  }, [startInterview, toast]);
 
   useEffect(() => {
     setHasHydrated(true);
@@ -1032,35 +1050,46 @@ export default function InterviewApp() {
 
   return (
     <CopilotKit runtimeUrl="/api/copilotkit">
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen animated-bg dark:animated-bg">
         {/* Header */}
-        <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-40 w-full border-b border-[var(--chat-border)] bg-white/70 dark:bg-gray-900/80 backdrop-blur-lg">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between text-[var(--apple-text)] dark:text-[#E0E0E0]">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+              <div className="p-2 rounded-lg" style={{background: 'linear-gradient(135deg,var(--apple-accent),var(--apple-accent-2))'}}>
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[var(--apple-accent)] to-[var(--apple-accent-2)] bg-clip-text text-transparent">
                 InterviewXP
               </h1>
             </div>
             
             {isInterviewActive && (
-              <Button
-                onClick={handleResetInterview}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2 hover:bg-red-50 hover:border-red-200 hover:text-red-700"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Reset Interview</span>
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={() => setShowTopicSelector(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                >
+                  <Code className="w-4 h-4" />
+                  <span>Change Topic</span>
+                </Button>
+                <Button
+                  onClick={handleResetInterview}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Reset Interview</span>
+                </Button>
+              </div>
             )}
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 text-[var(--apple-text)] dark:text-[#E0E0E0]">
           <AnimatePresence mode="wait">
             {!isInterviewActive ? (
               <motion.div
@@ -1072,26 +1101,26 @@ export default function InterviewApp() {
                 className="max-w-4xl mx-auto"
               >
                 {/* Hero Section */}
-                <div className="text-center mb-12">
+                 <div className="text-center mb-12">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6 }}
                     className="mb-6"
                   >
-                    <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full px-4 py-2 mb-4">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">AI-Powered Interview Practice</span>
+                     <div className="inline-flex items-center space-x-2 rounded-full px-4 py-2 mb-4" style={{background:'linear-gradient(135deg,rgba(0,122,255,0.12),rgba(88,86,214,0.12))'}}>
+                       <Sparkles className="w-4 h-4 text-blue-500 dark:text-indigo-400" />
+                       <span className="text-sm font-medium text-blue-700 dark:text-indigo-200">AI-Powered Interview Practice</span>
                     </div>
                     
-                    <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+                     <h2 className="text-4xl md:text-6xl font-bold text-black dark:text-white mb-4">
                       Master Your
-                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                       <span className="bg-gradient-to-r from-[var(--apple-accent)] to-[var(--apple-accent-2)] bg-clip-text text-transparent">
                         {' '}Technical Interview
                       </span>
                     </h2>
                     
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                     <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
                       Practice with our AI interviewer, get real-time feedback, and build confidence 
                       for your next technical interview. Choose your language and start improving today.
                     </p>
@@ -1112,37 +1141,37 @@ export default function InterviewApp() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
-                  className="grid md:grid-cols-3 gap-6 mb-12"
+                   className="grid md:grid-cols-3 gap-6 mb-12"
                 >
                   {[
                     {
                       icon: <Brain className="w-8 h-8" />,
                       title: 'AI-Powered Questions',
                       description: 'Dynamic questions that adapt to your skill level and provide personalized challenges.',
-                      color: 'from-blue-500 to-cyan-500'
+                       color: 'from-indigo-500 to-violet-500'
                     },
                     {
                       icon: <Code className="w-8 h-8" />,
                       title: 'Multiple Formats',
                       description: 'Practice MCQs, code analysis, algorithm challenges, and system design problems.',
-                      color: 'from-purple-500 to-pink-500'
+                       color: 'from-violet-500 to-purple-500'
                     },
                     {
                       icon: <MessageSquare className="w-8 h-8" />,
                       title: 'Real-time Feedback',
                       description: 'Get instant scoring and detailed explanations to improve your performance.',
-                      color: 'from-green-500 to-teal-500'
+                       color: 'from-emerald-500 to-teal-500'
                     }
                   ].map((feature, index) => (
-                    <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <Card key={index} className="border border-[#404258] shadow-xl bg-[#2C2E3A]">
                       <CardHeader className="text-center">
                         <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center text-white mb-4`}>
                           {feature.icon}
                         </div>
-                        <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
+                        <CardTitle className="text-xl font-semibold text-white">{feature.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-gray-600 text-center">{feature.description}</p>
+                        <p className="text-gray-300 text-center">{feature.description}</p>
                       </CardContent>
                     </Card>
                   ))}
@@ -1224,8 +1253,12 @@ export default function InterviewApp() {
                               className="w-full gemini-chat copilot-chat-container"
                             >
                               {/* Guidance Banner */}
-                              <div className="mb-3 mx-3 mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                                Tip: Use the A/B/C/D buttons to submit an answer for scoring. Use the help chips for hints and explanations. Click Evaluate for a detailed rationale, or Next Question to proceed.
+                              <div className="mb-3 mx-3 mt-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 flex items-start gap-2">
+                                <Info className="w-4 h-4 mt-0.5 text-blue-700" />
+                                <div>
+                                  <div className="font-medium">How to use this chat</div>
+                                  <div className="text-blue-800/90">Use A/B/C/D to submit answers for scoring. Use the chips for hints and explanations. Click Evaluate for a detailed rationale, or Next Question to proceed.</div>
+                                </div>
                               </div>
                               <CopilotChat
                                 instructions={interviewerInstructions}
@@ -1284,6 +1317,65 @@ export default function InterviewApp() {
             </CopilotKit>
           </div>
           
+        )}
+        
+        {/* Topic Selection Modal */}
+        {showTopicSelector && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-[var(--apple-card)] dark:bg-[#2C2C2E] rounded-2xl p-6 max-w-md w-full mx-4 border border-[var(--chat-border)] shadow-2xl"
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold text-[var(--apple-text)] dark:text-white mb-2">
+                  Change Interview Topic
+                </h3>
+                <p className="text-[var(--apple-subtext)] dark:text-gray-300 text-sm">
+                  Select a new topic to continue your interview practice
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {[
+                  { name: 'JavaScript', icon: '⚡' },
+                  { name: 'Python', icon: '🐍' },
+                  { name: 'Java', icon: '☕' },
+                  { name: 'C++', icon: '⚙️' },
+                  { name: 'React', icon: '⚛️' },
+                  { name: 'Node.js', icon: '🟢' },
+                  { name: 'Data Science', icon: '📊' },
+                  { name: 'DBMS', icon: '🗄️' },
+                  { name: 'System Design', icon: '🏗️' },
+                  { name: 'Algorithms', icon: '🧮' },
+                  { name: 'Machine Learning', icon: '🤖' },
+                  { name: 'DevOps', icon: '🔧' }
+                ].map((topic) => (
+                  <button
+                    key={topic.name}
+                    onClick={() => handleChangeTopic(topic.name)}
+                    className="flex flex-col items-center p-4 rounded-xl border border-[var(--chat-border)] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <span className="text-2xl mb-2">{topic.icon}</span>
+                    <span className="text-sm font-medium text-[var(--apple-text)] dark:text-white">
+                      {topic.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => setShowTopicSelector(false)}
+                  variant="outline"
+                  className="border-[var(--chat-border)] text-[var(--apple-text)] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </div>
         )}
         
       </div>
