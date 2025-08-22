@@ -8,9 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "@copilotkit/react-core": "^1.10.1",
-    "@copilotkit/react-ui": "^1.10.1",
-    "@copilotkit/runtime": "^1.10.1",
+    "@copilotkit/react-core": "^1.9.1",
+    "@copilotkit/react-textarea": "^1.10.2",
+    "@copilotkit/react-ui": "^1.9.1",
+    "@copilotkit/runtime": "^1.10.2",
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.9.0",
     "@langchain/google-genai": "^0.2.16",
@@ -55,6 +56,7 @@
     "encoding": "^0.1.13",
     "eslint": "8.49.0",
     "eslint-config-next": "13.5.1",
+    "express": "^5.1.0",
     "framer-motion": "^12.23.12",
     "input-otp": "^1.2.4",
     "langchain": "^0.3.30",
@@ -73,7 +75,6 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.2.2",
     "vaul": "^0.9.9",
     "weaviate-ts-client": "^2.2.0",
     "zod": "^3.23.8",
@@ -81,6 +82,10 @@
   },
   "devDependencies": {
     "@types/react-syntax-highlighter": "^15.5.13",
-    "cross-env": "^10.0.0"
+    "cross-env": "^10.0.0",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
   }
 }
