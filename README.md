@@ -4,7 +4,17 @@ InterviewXP is an advanced, interactive web application designed to help users m
 ✨ Features
 Adaptive Interviewer: An AI interviewer that asks dynamic, contextually relevant questions based on your chosen subject and adapts difficulty based on your self-rated proficiency and performance.
 
-Comprehensive Subjects: Practice across a wide range of topics including JavaScript, Python, Java, C++, Go, TypeScript, Rust, SQL, React, Next.js, Node.js, Data Science, ML, NLP, App Development, DSA, OOP, CN, DBMS, SE, OS.
+Comprehensive Subjects: Practice across a wide range of topics including:
+
+JavaScript, Python, Java, C++, Go, TypeScript, Rust, SQL
+
+React, Next.js, Node.js
+
+Data Science, ML, NLP
+
+App Development, DSA, OOP
+
+CN, DBMS, SE, OS
 
 Multiple Question Formats: Engages users with various question types:
 
@@ -64,23 +74,24 @@ npm install
 Environment Variables
 Create a .env.local file in the root of your project and add your API keys:
 
-# .env.local
 
-# === Google Gemini AI Key ===
+.env.local
+
+=== Google Gemini AI Key ===
 GEMINI_API_KEY="YOUR_GOOGLE_GEMINI_API_KEY"
 
-# === CopilotKit Public API Key (if using CopilotKit's hosted services, otherwise runtimeUrl is used) ===
-# NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY="YOUR_COPILOTKIT_PUBLIC_API_KEY"
+=== CopilotKit Public API Key (if using CopilotKit's hosted services, otherwise runtimeUrl is used) ===
+NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY="YOUR_COPILOTKIT_PUBLIC_API_KEY"
 
-# === Weaviate Vector DB (Optional, if integrating for advanced context) ===
-# WEAVIATE_URL="YOUR_WEAVIATE_URL"
-# WEAVIATE_GRPC_URL="YOUR_WEAVIATE_GRPC_URL"
-# WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY"
+=== Weaviate Vector DB (Optional, if integrating for advanced context) ===
+WEAVIATE_URL="YOUR_WEAVIATE_URL"
+WEAVIATE_GRPC_URL="YOUR_WEAVIATE_GRPC_URL"
+WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY"
 
-# === LangChain Related (optional for tracing) ===
-# LANGCHAIN_API_KEY="YOUR_LANGCHAIN_API_KEY"
-# LANGCHAIN_TRACING_V2=true
-# LANGCHAIN_PROJECT=InterviewXP
+=== LangChain Related (optional for tracing) ===
+LANGCHAIN_API_KEY="YOUR_LANGCHAIN_API_KEY"
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=InterviewXP
 
 Important: Replace "YOUR_GOOGLE_GEMINI_API_KEY" with your actual API key.
 
@@ -112,47 +123,10 @@ Contextual Help: Ask the assistant for hints, concept explanations, or code exam
 
 Guidance: The assistant will guide you towards the answer without directly providing it.
 
-📂 Project Structure (Industry Standard)
-The project is structured for clarity, maintainability, and scalability, crucial for Gen AI applications.
 
-project/
-├── app/
-│   ├── api/
-│   │   └── copilotkit/
-│   │       └── route.ts             # Central CopilotKit API endpoint (handles both AI roles)
-│   ├── layout.tsx                 # Root layout for your Next.js app
-│   └── page.tsx                   # Main application component (InterviewApp)
-├── components/
-│   ├── ui/                        # Shadcn UI components (Button, Card, etc.)
-│   │   └── ...
-│   ├── LanguageSelector.tsx       # Component for language selection buttons
-│   ├── InterviewStats.tsx         # Displays interview statistics
-│   ├── CustomSuggestionsList.tsx  # Custom component for rendering AI suggestions (buttons)
-│   │                                # (Used by both CopilotChat and CopilotPopup)
-│   └── ... (other reusable UI components)
-├── hooks/
-│   ├── use-interview-state.ts     # Custom hook for managing overall interview state
-│   └── ... (other custom React hooks)
-├── lib/
-│   ├── weaviate.ts                # (Optional) Weaviate client and interaction logic
-│   ├── prompts.ts                 # Centralized definitions for INTERVIEWER_PROMPT & ASSISTANT_PROMPT
-│   └── ... (other utility functions)
-├── types/
-│   ├── index.d.ts                 # TypeScript type definitions/interfaces
-│   └── ...
-├── public/
-│   └── ... (static assets)
-├── styles/
-│   ├── globals.css                # Global CSS (Tailwind CSS base styles, custom code block styling)
-│   └── ...
-├── .env.local                     # Environment variables (NEVER commit to Git)
-├── next.config.js                 # Next.js configuration (webpack, dynamic routes)
-├── package.json                   # Project dependencies and scripts
-├── tsconfig.json                  # TypeScript configuration
-└── ...
 
 🧠 AI Prompts (Core AI Logic)
-The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected.
+The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected. The prompts are centrally defined in lib/prompts.ts.
 
 INTERVIEWER_PROMPT: Guides the main chat to conduct structured interviews, adapt difficulty, provide detailed feedback, and generate relevant questions.
 
