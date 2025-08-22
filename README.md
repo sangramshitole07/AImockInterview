@@ -132,35 +132,39 @@ project/
 │   │   └── copilotkit/
 │   │       └── route.ts             # Central CopilotKit API endpoint (handles both AI roles)
 │   ├── layout.tsx                 # Root layout for your Next.js app
-│   └── page.tsx                   # Main application component (InterviewApp)
+│   └── page.tsx                   # Main application component (where InterviewApp is rendered)
 ├── components/
-│   ├── ui/                        # Shadcn UI components (Button, Card, etc.)
-│   │   └── ...
-│   ├── LanguageSelector.tsx       # Component for language selection buttons
-│   ├── InterviewStats.tsx         # Displays interview statistics
-│   ├── CustomSuggestionsList.tsx  # Custom component for rendering AI suggestions (buttons)
+│   ├── ui/                        # Shadcn UI components (e.g., Button, Card)
+│   │   ├── button.tsx
+│   │   └── card.tsx
+│   │   └── ... (other Shadcn UI components)
+│   ├── LanguageSelector.tsx       # Component for selecting interview language buttons
+│   ├── InterviewStats.tsx         # Displays interview statistics (e.g., score, questions answered)
+│   ├── CustomSuggestionsList.tsx  # Custom component for rendering AI suggestions (e.g., clickable buttons)
 │   │                                # (Used by both CopilotChat and CopilotPopup)
-│   └── ... (other reusable UI components)
+│   └── ... (other reusable UI components specific to your app)
 ├── hooks/
-│   ├── use-interview-state.ts     # Custom hook for managing overall interview state
-│   └── ... (other custom React hooks)
+│   ├── use-interview-state.ts     # Custom React hook for managing overall interview state (e.g., selected language, active status, responses)
+│   └── ... (other custom React hooks for specific logic)
 ├── lib/
-│   ├── weaviate.ts                # (Optional) Weaviate client and interaction logic
-│   ├── prompts.ts                 # Centralized definitions for INTERVIEWER_PROMPT & ASSISTANT_PROMPT
-│   └── ... (other utility functions)
+│   ├── weaviate.ts                # (Optional) Service for interacting with Weaviate (vector DB client, embedding logic)
+│   ├── prompts.ts                 # Centralized definitions for INTERVIEWER_PROMPT & ASSISTANT_PROMPT constants
+│   ├── llm-client.ts              # (Optional) Utility for direct LLM calls if needed outside CopilotKit's flow
+│   └── utils.ts                   # General utility functions (e.g., data formatting, helpers)
 ├── types/
-│   ├── index.d.ts                 # TypeScript type definitions/interfaces
-│   └── ...
+│   ├── index.d.ts                 # TypeScript type definitions and interfaces (e.g., ChatMessage, UserProfile, InterviewState)
+│   └── ... (other specific type definition files)
 ├── public/
-│   └── ... (static assets)
+│   ├── favicon.ico
+│   └── ... (static assets like images, fonts)
 ├── styles/
-│   ├── globals.css                # Global CSS (Tailwind CSS base styles, custom code block styling)
-│   └── ...
-├── .env.local                     # Environment variables (NEVER commit to Git)
-├── next.config.js                 # Next.js configuration (webpack, dynamic routes)
-├── package.json                   # Project dependencies and scripts
-├── tsconfig.json                  # TypeScript configuration
-└── ...
+│   ├── globals.css                # Global CSS (e.g., Tailwind CSS base styles, custom code block styling)
+│   └── ... (other specific CSS modules or files)
+├── .env.local                     # Environment variables (NEVER commit to Git, contains sensitive API keys)
+├── next.config.js                 # Next.js configuration (e.g., webpack customizations, dynamic route settings)
+├── package.json                   # Project dependencies, scripts, and metadata
+├── tsconfig.json                  # TypeScript configuration for the project
+└── README.md  
 
 🧠 AI Prompts (Core AI Logic)
 The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected. The prompts are centrally defined in lib/prompts.ts.
