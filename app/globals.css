@@ -319,6 +319,132 @@
   .copilot-chat-container {
     display: block;
   }
+
+  /* Apple-Themed Copilot Popup Styling */
+  [data-testid="copilot-popup"] {
+    backdrop-filter: blur(30px) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(229, 229, 234, 0.6) !important;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12), 0 12px 40px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 20px !important;
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+
+  /* Apple-style popup header */
+  [data-testid="copilot-popup"] [data-testid="chat-header"] {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+    color: white !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 20px 24px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Apple-style popup input */
+  [data-testid="copilot-popup"] [data-testid="chat-input"] {
+    border-top: 1px solid rgba(229, 229, 234, 0.8) !important;
+    background: rgba(248, 248, 250, 0.8) !important;
+    border-radius: 0 0 20px 20px !important;
+    padding: 20px 24px !important;
+  }
+
+  /* Apple-style input field */
+  [data-testid="copilot-popup"] [data-testid="chat-input"] input,
+  [data-testid="copilot-popup"] [data-testid="chat-input"] textarea {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(229, 229, 234, 0.8) !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    transition: all 0.2s ease !important;
+  }
+
+  [data-testid="copilot-popup"] [data-testid="chat-input"] input:focus,
+  [data-testid="copilot-popup"] [data-testid="chat-input"] textarea:focus {
+    border-color: #007AFF !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1) !important;
+    outline: none !important;
+  }
+
+  /* Apple-style send button */
+  [data-testid="copilot-popup"] [data-testid="chat-input"] button {
+    background: linear-gradient(135deg, #007AFF, #5856D6) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+  }
+
+  [data-testid="copilot-popup"] [data-testid="chat-input"] button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3) !important;
+  }
+
+  /* Apple-style popup messages */
+  [data-testid="copilot-popup"] [data-testid="chat-messages"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 24px !important;
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Apple-style message bubbles */
+  [data-testid="copilot-popup"] [data-testid="chat-messages"] [data-testid="message"] {
+    margin-bottom: 16px !important;
+    padding: 12px 16px !important;
+    border-radius: 16px !important;
+    font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  }
+
+  /* User message styling */
+  [data-testid="copilot-popup"] [data-testid="chat-messages"] [data-testid="message"][data-testid="user-message"] {
+    background: linear-gradient(135deg, #007AFF, #5856D6) !important;
+    color: white !important;
+    margin-left: auto !important;
+    max-width: 80% !important;
+  }
+
+  /* Assistant message styling */
+  [data-testid="copilot-popup"] [data-testid="chat-messages"] [data-testid="message"][data-testid="assistant-message"] {
+    background: rgba(245, 245, 247, 0.8) !important;
+    color: #1C1C1E !important;
+    margin-right: auto !important;
+    max-width: 85% !important;
+    border: 1px solid rgba(229, 229, 234, 0.6) !important;
+  }
+
+  /* Smooth Apple-style animations */
+  [data-testid="copilot-popup"] {
+    animation: applePopupSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  }
+
+  @keyframes applePopupSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Apple-style close button */
+  [data-testid="copilot-popup"] [data-testid="close-button"] {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(229, 229, 234, 0.8) !important;
+    border-radius: 50% !important;
+    color: #1C1C1E !important;
+    transition: all 0.2s ease !important;
+  }
+
+  [data-testid="copilot-popup"] [data-testid="close-button"]:hover {
+    background: rgba(245, 245, 247, 0.9) !important;
+    transform: scale(1.05) !important;
+  }
   
   .message-enter-active {
     opacity: 1;

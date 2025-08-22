@@ -1,5 +1,5 @@
 'use client';
-
+import Link from "next/link";
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CopilotPopup, CopilotChat } from '@copilotkit/react-ui';
@@ -15,7 +15,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { CopilotSuggestions } from '@/components/CopilotSuggestions'; // Assuming this is correct
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info } from 'lucide-react';
+import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info, Home } from 'lucide-react';
 
 // =============================================================================
 // AI Prompts
@@ -179,283 +179,11 @@ Final Instructions:
 // Custom Components (Moved here for clarity and self-containment)
 // =============================================================================
 
-// Custom Suggestions List Component (Popup only)
-const CustomSuggestionsList = ({ suggestions = [], onSuggestionClick }: RenderSuggestionsListProps) => {
-  const wrap = (m: string) =>
-    `Assistant request: Reply as the interview assistant. Do not evaluate or score the user's answer. Provide a detailed plain-text response. ${m}`;
-  const helperSuggestions = [
-    { title: 'Hint', message: 'Give a subtle hint about the current question without revealing the final answer. Nudge me toward the key idea.' },
-    { title: 'Approach Outline', message: 'Provide a detailed approach in plain text: overview, steps, why each step works, and when to apply it. Do not give the final code.' },
-    { title: 'Step-by-Step', message: 'Guide me step-by-step toward the answer. Explain each step clearly and state why it is necessary. Avoid giving the final answer.' },
-    { title: 'Explain Concept', message: 'Explain the underlying concept in plain text with a simple analogy and a tiny plain-text example.' },
-    { title: 'Real-Life Example', message: 'Give a practical real-life example that maps to this problem and explain how the mapping helps solve it.' },
-    { title: 'Edge Cases', message: 'List important edge cases in plain text and how to handle each one. Explain why each edge case matters.' },
-    { title: 'Complexity & Trade-offs', message: 'Analyze time and space complexity for a simple approach and an optimized approach. Explain the trade-offs and when to use each.' },
-    { title: 'Debugging Tips', message: 'Suggest targeted debugging checks and common failure points for this type of problem. Mention what each check reveals.' },
-    { title: 'Test Cases', message: 'Propose a small set of high-signal test cases as plain text (inputs and expected outputs) to validate a solution.' },
-    { title: 'Compare Solutions', message: 'Compare two viable approaches and explain pros, cons, and selection criteria.' },
-    { title: 'Optimize Solution', message: 'Assume a baseline solution exists. Suggest concrete optimizations and explain their impact and risks.' },
-    { title: 'Constraints Review', message: 'Ask me to confirm constraints and assumptions and explain how they affect the solution approach.' }
-  ];
-
-  const contextSuggestions = [
-    { title: 'Provide Question', message: 'Here is the exact question I am working on: ' },
-    { title: 'Language/Subject', message: 'The language or subject for this question is: ' },
-    { title: 'What I Tried', message: 'What I have tried so far: ' },
-    { title: 'Constraints', message: 'Key constraints and assumptions are: ' },
-    { title: 'Environment', message: 'My environment/framework/tools are: ' },
-    { title: 'Error Message', message: 'The error message I am seeing is: ' },
-    { title: 'Failing Case', message: 'A failing test case (input and expected vs actual) is: ' }
-  ];
-
-  return (
-    <div className="suggestions flex flex-col gap-3 p-4 bg-gray-50 rounded-lg">
-      {Array.isArray(suggestions) && suggestions.length > 0 && (
-        <>
-          <h2 className="font-semibold text-gray-700">Suggested:</h2>
-          <div className="flex flex-wrap gap-2">
-            {suggestions.map((suggestion, index) => (
-              <RenderSuggestion
-                key={`dyn-${index}`}
-                title={suggestion.title}
-                message={suggestion.message}
-                partial={suggestion.partial}
-                className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
-                onClick={() => onSuggestionClick(wrap(suggestion.message))}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      <h2 className="font-semibold text-gray-700">Quick Help:</h2>
-      <div className="flex flex-wrap gap-2">
-        {helperSuggestions.map((suggestion, index) => (
-          <RenderSuggestion
-            key={`help-${index}`}
-            title={suggestion.title}
-            message={suggestion.message}
-            partial={false}
-            className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
-            onClick={() => onSuggestionClick(wrap(suggestion.message))}
-          />
-        ))}
-      </div>
-
-      <h2 className="font-semibold text-gray-700 mt-2">Provide Context:</h2>
-      <div className="flex flex-wrap gap-2">
-        {contextSuggestions.map((suggestion, index) => (
-          <RenderSuggestion
-            key={`ctx-${index}`}
-            title={suggestion.title}
-            message={suggestion.message}
-            partial={false}
-            className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm shadow-sm hover:bg-gray-100"
-            onClick={() => onSuggestionClick(wrap(suggestion.message))}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // Suggestions list for CopilotChat (no assistant wrapping)
-const ChatSuggestionsList = ({ suggestions = [], onSuggestionClick }: RenderSuggestionsListProps) => {
-  const helperSuggestions = [
-    { title: 'Ask for a Hint', message: 'ASSIST: In English only: Could you give me a subtle hint without revealing the full answer?' },
-    { title: 'Approach Outline', message: 'ASSIST: In English only: Provide a practical approach outline with steps and why each step matters.' },
-    { title: 'Explain Concept', message: 'ASSIST: In English only: Please explain the core concept involved here in simple terms.' },
-    { title: 'Step-by-Step', message: 'ASSIST: In English only: Can you guide me step-by-step on how to approach this?' },
-    { title: 'Edge Cases', message: 'ASSIST: In English only: What edge cases should I consider for this problem?' },
-    { title: 'Debugging Tips', message: 'ASSIST: In English only: Suggest targeted debugging tips and common pitfalls to check.' },
-    { title: 'Test Cases', message: 'ASSIST: In English only: Propose a few high-signal test cases with expected outputs.' },
-    { title: 'Compare Solutions', message: 'ASSIST: In English only: Compare two viable approaches and when to pick each.' },
-    { title: 'Optimize Solution', message: 'ASSIST: In English only: Suggest concrete optimizations and their trade-offs.' },
-    { title: 'Real-Life Example', message: 'ASSIST: In English only: Provide a real-life analogy that maps to this problem.' },
-    { title: 'Common Mistakes', message: 'ASSIST: In English only: What are common mistakes and how can I avoid them?' },
-    { title: 'Pseudocode', message: 'ASSIST: In English only: Provide brief pseudocode to clarify the approach.' },
-    { title: 'Visualize Flow', message: 'ASSIST: In English only: Describe the control/data flow to visualize the solution.' },
-    { title: 'Complexity', message: 'ASSIST: In English only: What is the expected time and space complexity for an optimal solution?' },
-  ];
 
-  const contextSuggestions = [
-    { title: 'Provide Question', message: 'ASSIST: In English only: Here is the exact question I am working on: ' },
-    { title: 'What I Tried', message: 'ASSIST: In English only: What I have tried so far: ' },
-    { title: 'Error Message', message: 'ASSIST: In English only: The error I am seeing is: ' },
-    { title: 'Failing Case', message: 'ASSIST: In English only: A failing test case is: ' },
-    { title: 'Clarify Constraints', message: 'ASSIST: In English only: Could you clarify the constraints and assumptions?' },
-    { title: 'Provide Example', message: 'ASSIST: In English only: Can you provide a small example to illustrate the idea?' },
-    { title: 'Compare Approaches', message: 'ASSIST: In English only: How do two common approaches compare, and when should I pick each?' },
-  ];
-
-  return (
-    <div className="suggestions flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
-      {Array.isArray(suggestions) && suggestions.length > 0 && (
-        <>
-          <h2 className="font-semibold text-gray-700">Suggested:</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {suggestions.map((suggestion, index) => (
-              <RenderSuggestion
-                key={`chat-dyn-${index}`}
-                title={suggestion.title}
-                message={suggestion.message}
-                partial={suggestion.partial}
-                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
-                onClick={() => onSuggestionClick(suggestion.message)}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-      <h2 className="font-semibold text-gray-700">Quick Help:</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {helperSuggestions.map((suggestion, index) => (
-          <RenderSuggestion
-            key={`chat-help-${index}`}
-            title={suggestion.title}
-            message={suggestion.message}
-            partial={false}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
-            onClick={() => onSuggestionClick(suggestion.message)}
-          />
-        ))}
-      </div>
-
-      <h2 className="font-semibold text-gray-700 mt-2">Ask for Context:</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {contextSuggestions.map((suggestion, index) => (
-          <RenderSuggestion
-            key={`chat-ctx-${index}`}
-            title={suggestion.title}
-            message={suggestion.message}
-            partial={false}
-            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition-colors"
-            onClick={() => onSuggestionClick(suggestion.message)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // Custom Input Component for Copilot popup/chat
-function CustomInput({ inProgress, onSend, isVisible }: InputProps) {
-  const handleSubmit = (value: string) => {
-    if (value && value.trim().length > 0) {
-      const wrapped = `Assistant request: Reply as the interview assistant. Respond in English only. Do not evaluate or score the user's answer. Provide a detailed plain-text response. ${value}`;
-      onSend(wrapped);
-    }
-  };
-
-  const wrapperStyle = "flex gap-2 p-4 border-t";
-  const inputStyle = "flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 shadow-sm";
-  const buttonStyle = "px-4 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm transition-transform active:scale-95";
-  const chipStyle = "rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition";
-
-  const helperSuggestions = [
-    { title: 'Hint', message: 'Give a subtle hint about the current question without revealing the final answer. Nudge me toward the key idea.' },
-    { title: 'Approach Outline', message: 'Provide a detailed approach in plain text: overview, steps, why each step works, and when to apply it. Do not give the final code.' },
-    { title: 'Step-by-Step', message: 'Guide me step-by-step toward the answer. Explain each step clearly and state why it is necessary. Avoid giving the final answer.' },
-    { title: 'Explain Concept', message: 'Explain the underlying concept in plain text with a simple analogy and a tiny plain-text example.' },
-    { title: 'Real-Life Example', message: 'Give a practical real-life example that maps to this problem and explain how the mapping helps solve it.' },
-    { title: 'Edge Cases', message: 'List important edge cases in plain text and how to handle each one. Explain why each edge case matters.' },
-    { title: 'Complexity & Trade-offs', message: 'Analyze time and space complexity for a simple approach and an optimized approach. Explain the trade-offs and when to use each.' },
-    { title: 'Debugging Tips', message: 'Suggest targeted debugging checks and common failure points for this type of problem. Mention what each check reveals.' },
-    { title: 'Test Cases', message: 'Propose a small set of high-signal test cases as plain text (inputs and expected outputs) to validate a solution.' },
-    { title: 'Compare Solutions', message: 'Compare two viable approaches and explain pros, cons, and selection criteria.' },
-    { title: 'Optimize Solution', message: 'Assume a baseline solution exists. Suggest concrete optimizations and explain their impact and risks.' },
-    { title: 'Constraints Review', message: 'Ask me to confirm constraints and assumptions and explain how they affect the solution approach.' }
-  ];
-
-  const contextSuggestions = [
-    { title: 'Provide Question', message: 'Here is the exact question I am working on: ' },
-    { title: 'Language/Subject', message: 'The language or subject for this question is: ' },
-    { title: 'What I Tried', message: 'What I have tried so far: ' },
-    { title: 'Constraints', message: 'Key constraints and assumptions are: ' },
-    { title: 'Environment', message: 'My environment/framework/tools are: ' },
-    { title: 'Error Message', message: 'The error message I am seeing is: ' },
-    { title: 'Failing Case', message: 'A failing test case (input and expected vs actual) is: ' }
-  ];
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="flex flex-col">
-      {/* Distinct answer choice buttons for evaluation */}
-      <div className="flex gap-2 px-4 pt-3">
-        {['A','B','C','D'].map((choice) => (
-          <button
-            key={`ans-${choice}`}
-            type="button"
-            className="px-3 py-1 rounded-md text-white text-sm shadow-sm border-2"
-            style={{
-              background: choice === 'A' ? '#1f2937' : choice === 'B' ? '#0f766e' : choice === 'C' ? '#7c2d12' : '#111827',
-              borderColor: choice === 'A' ? '#60a5fa' : choice === 'B' ? '#34d399' : choice === 'C' ? '#fbbf24' : '#f87171'
-            }}
-            disabled={inProgress}
-            onClick={() => handleSubmit(`Answer: ${choice}`)}
-          >
-            {choice}
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2 px-4 pt-3">
-        {helperSuggestions.map((s, i) => (
-          <button
-            key={`help-${i}`}
-            type="button"
-            className={chipStyle}
-            disabled={inProgress}
-            onClick={() => handleSubmit(s.message)}
-          >
-            {s.title}
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2 px-4 pt-2 pb-1">
-        {contextSuggestions.map((s, i) => (
-          <button
-            key={`ctx-${i}`}
-            type="button"
-            className={chipStyle}
-            disabled={inProgress}
-            onClick={() => handleSubmit(s.message)}
-          >
-            {s.title}
-          </button>
-        ))}
-      </div>
-      <div className={wrapperStyle}>
-        <input
-          disabled={inProgress}
-          type="text"
-          placeholder="Ask your question here..."
-          className={inputStyle}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              const value = (e.currentTarget as HTMLInputElement).value;
-              handleSubmit(value);
-              (e.currentTarget as HTMLInputElement).value = '';
-            }
-          }}
-        />
-        <button
-          disabled={inProgress}
-          className={buttonStyle}
-          onClick={(e) => {
-            const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-            const value = input?.value || '';
-            handleSubmit(value);
-            if (input) input.value = '';
-          }}
-        >
-          Ask
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // Input for CopilotChat (no assistant wrapping, suggestions to guide learning)
 function InterviewerChatInput({ inProgress, onSend, isVisible }: InputProps) {
@@ -469,32 +197,32 @@ function InterviewerChatInput({ inProgress, onSend, isVisible }: InputProps) {
   const inputStyle = "flex-1 p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 shadow-sm";
   const buttonStyle = "px-4 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm transition-transform active:scale-95";
   const chipStyle = "rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm hover:bg-gray-50 transition";
-
   const helperSuggestions = [
-    { title: 'Hint', message: 'ASSIST: In English only: Could you give me a subtle hint?' },
-    { title: 'Approach Outline', message: 'ASSIST: In English only: Provide a practical approach outline with steps and why each step matters.' },
-    { title: 'Explain Concept', message: 'ASSIST: In English only: Please explain the underlying concept in simple terms.' },
-    { title: 'Step-by-Step', message: 'ASSIST: In English only: Can you break down the approach step-by-step?' },
-    { title: 'Edge Cases', message: 'ASSIST: In English only: What edge cases should I watch out for?' },
-    { title: 'Debugging Tips', message: 'ASSIST: In English only: Suggest targeted debugging tips and common pitfalls to check.' },
-    { title: 'Test Cases', message: 'ASSIST: In English only: Propose a few high-signal test cases with expected outputs.' },
-    { title: 'Compare Solutions', message: 'ASSIST: In English only: Compare two viable approaches and when to pick each.' },
-    { title: 'Optimize Solution', message: 'ASSIST: In English only: Suggest concrete optimizations and their trade-offs.' },
-    { title: 'Real-Life Example', message: 'ASSIST: In English only: Provide a real-life analogy that maps to this problem.' },
-    { title: 'Common Mistakes', message: 'ASSIST: In English only: What are common mistakes and how can I avoid them?' },
-    { title: 'Pseudocode', message: 'ASSIST: In English only: Provide brief pseudocode to clarify the approach.' },
-    { title: 'Visualize Flow', message: 'ASSIST: In English only: Describe the control/data flow to visualize the solution.' },
-    { title: 'Complexity', message: 'ASSIST: In English only: What is the expected time and space complexity?' },
+    { title: 'Hint', message: 'ASSIST: Could you give me a subtle hint?' },
+    { title: 'Approach Outline', message: 'ASSIST: Provide a practical approach outline with steps and why each step matters.' },
+    { title: 'Explain Concept', message: 'ASSIST: Please explain the underlying concept in simple terms.' },
+    { title: 'Step-by-Step', message: 'ASSIST: Can you break down the approach step-by-step?' },
+    { title: 'Edge Cases', message: 'ASSIST: What edge cases should I watch out for?' },
+  
+    { title: 'Debugging Tips', message: 'ASSIST: Suggest targeted debugging tips and common pitfalls to check.' },
+    { title: 'Test Cases', message: 'ASSIST: Propose a few high-signal test cases with expected outputs.' },
+    { title: 'Compare Solutions', message: 'ASSIST: Compare two viable approaches and when to pick each.' },
+    { title: 'Optimize Solution', message: 'ASSIST: Suggest concrete optimizations and their trade-offs.' },
+    { title: 'Real-Life Example', message: 'ASSIST: Provide a real-life analogy that maps to this problem.' },
+    { title: 'Common Mistakes', message: 'ASSIST: What are common mistakes and how can I avoid them?' },
+    { title: 'Pseudocode', message: 'ASSIST: Provide brief pseudocode to clarify the approach.' },
+    { title: 'Visualize Flow', message: 'ASSIST: Describe the control/data flow to visualize the solution.' },
+    { title: 'Complexity', message: 'ASSIST: What is the expected time and space complexity?' },
   ];
-
+  
   const contextSuggestions = [
-    { title: 'Provide Question', message: 'ASSIST: In English only: Here is the exact question I am working on: ' },
-    { title: 'What I Tried', message: 'ASSIST: In English only: What I have tried so far: ' },
-    { title: 'Error Message', message: 'ASSIST: In English only: The error I am seeing is: ' },
-    { title: 'Failing Case', message: 'ASSIST: In English only: A failing test case is: ' },
-    { title: 'Clarify Constraints', message: 'ASSIST: In English only: Could you clarify the constraints and assumptions?' },
-    { title: 'Provide Example', message: 'ASSIST: In English only: Can you share a small example to illustrate?' },
-    { title: 'Compare Approaches', message: 'ASSIST: In English only: How do different approaches compare here?' },
+    { title: 'Provide Question', message: 'ASSIST: Here is the exact question I am working on: ' },
+    { title: 'What I Tried', message: 'ASSIST: What I have tried so far: ' },
+    { title: 'Error Message', message: 'ASSIST: The error I am seeing is: ' },
+    { title: 'Failing Case', message: 'ASSIST: A failing test case is: ' },
+    { title: 'Clarify Constraints', message: 'ASSIST: Could you clarify the constraints and assumptions?' },
+    { title: 'Provide Example', message: 'ASSIST: Can you share a small example to illustrate?' },
+    { title: 'Compare Approaches', message: 'ASSIST: How do different approaches compare here?' },
   ];
 
   if (!isVisible) return null;
@@ -623,6 +351,39 @@ export default function InterviewApp() {
   const [isInterviewerChatOpen, setIsInterviewerChatOpen] = useState(false);
   const [showTopicSelector, setShowTopicSelector] = useState(false);
   const { toast } = useToast();
+  const [popupBg, setPopupBg] = useState<string>("#fff");
+  // 1. Add state for component colors
+  const [componentColors, setComponentColors] = useState<{ [key: string]: string }>({});
+
+  // 2. Register Copilot action for changing component color
+  useCopilotAction({
+    name: "change_component_color",
+    description: "Change the background or color of a UI component by its key.",
+    parameters: [
+      { name: "component", type: "string", description: "The component key or id (e.g., 'popup', 'header', 'main', etc.)" },
+      { name: "color", type: "string", description: "Any valid CSS color or gradient." },
+    ],
+    handler: ({ component, color }) => {
+      setComponentColors((prev) => ({ ...prev, [component]: color }));
+    },
+  });
+  useEffect(() => {
+    // This check ensures the code only runs in a browser environment
+    if (typeof window !== 'undefined') {
+      // Assign the handler to the window object here
+      (window as any).copilotChangeComponentColor = (component: string, color: string) => {
+        setComponentColors((prev) => ({ ...prev, [component]: color }));
+      };
+  
+      // Optional: Clean up the global variable when the component unmounts
+      return () => {
+        if (typeof window !== 'undefined') {
+          delete (window as any).copilotChangeComponentColor;
+        }
+      };
+    }
+  }, []);
+  
 
   // Dynamic interviewer instructions bound to the selected language/subject
   const interviewerInstructions = useMemo(() => {
@@ -699,121 +460,10 @@ export default function InterviewApp() {
     },
   });
 
-  useCopilotAction({
-    name: "provideHint",
-    description: "Provide a helpful hint to the user without giving away the complete answer.",
-    parameters: [
-      {
-        name: "hint",
-        type: "string",
-        description: "The hint to provide to the user",
-      },
-      {
-        name: "category",
-        type: "string",
-        description: "Category of hint (concept, approach, syntax, etc.)",
-      }
-    ],
-    handler: async ({ hint, category }) => {
-      console.log(`Providing ${category} hint: ${hint}`);
-      
-      return {
-        success: true,
-        message: `Hint provided: ${hint}`
-      };
-    },
-  });
+ 
 
-  useCopilotAction({
-    name: "trackProgress",
-    description: "Track the user's interview progress and performance metrics.",
-    parameters: [
-      {
-        name: "questionsAnswered",
-        type: "number",
-        description: "Number of questions answered so far",
-      },
-      {
-        name: "averageScore",
-        type: "number",
-        description: "Current average score",
-      },
-      {
-        name: "timeSpent",
-        type: "string",
-        description: "Time spent in the interview",
-      }
-    ],
-    handler: async ({ questionsAnswered, averageScore, timeSpent }) => {
-      console.log(`Progress: ${questionsAnswered} questions, ${averageScore} avg score, ${timeSpent}`);
-      
-      return {
-        success: true,
-        message: `Progress tracked: ${questionsAnswered} questions completed`
-      };
-    },
-  });
 
-  // Custom actions for the AI Assistant
-  useCopilotAction({
-    name: "explainConcept",
-    description: "Explain a programming concept in simple terms with examples.",
-    parameters: [
-      {
-        name: "concept",
-        type: "string",
-        description: "The programming concept to explain",
-      },
-      {
-        name: "language",
-        type: "string",
-        description: "Programming language context",
-      },
-      {
-        name: "level",
-        type: "string",
-        description: "Explanation level (beginner, intermediate, advanced)",
-      }
-    ],
-    handler: async ({ concept, language, level }) => {
-      console.log(`Explaining ${concept} for ${language} at ${level} level`);
-      
-      return {
-        success: true,
-        message: `Explained ${concept} for ${language} (${level} level)`
-      };
-    },
-  });
-
-  useCopilotAction({
-    name: "showCodeExample",
-    description: "Show a code example to illustrate a concept.",
-    parameters: [
-      {
-        name: "example",
-        type: "string",
-        description: "The code example to show",
-      },
-      {
-        name: "language",
-        type: "string",
-        description: "Programming language of the example",
-      },
-      {
-        name: "description",
-        type: "string",
-        description: "Brief description of what the example demonstrates",
-      }
-    ],
-    handler: async ({ example, language, description }) => {
-      console.log(`Showing ${language} example: ${description}`);
-      
-      return {
-        success: true,
-        message: `Showed ${language} example: ${description}`
-      };
-    },
-    });
+  
 
   // Provide context to the AI Interviewer
   const interviewContextId = useCopilotReadable({
@@ -831,34 +481,7 @@ export default function InterviewApp() {
   });
 
   // Provide language-specific context
-  useCopilotReadable({
-    description: "Selected programming language and its characteristics",
-    value: {
-      language: selectedLanguage,
-      languageFeatures: selectedLanguage === 'JavaScript' ? {
-        focusAreas: ['ES6+ features', 'Async programming', 'DOM manipulation', 'Closures', 'Prototypal inheritance'],
-        difficulty: 'Medium to Advanced',
-        commonTopics: ['Promises', 'async/await', 'Arrow functions', 'Destructuring', 'Modules']
-      } : selectedLanguage === 'Python' ? {
-        focusAreas: ['Pythonic code', 'List comprehensions', 'Decorators', 'Exception handling', 'Memory management'],
-        difficulty: 'Easy to Advanced',
-        commonTopics: ['List comprehensions', 'Generators', 'Context managers', 'EAFP principle', 'Popular libraries']
-      } : selectedLanguage === 'Java' ? {
-        focusAreas: ['OOP principles', 'Collections framework', 'Exception handling', 'Memory management', 'Concurrency'],
-        difficulty: 'Medium to Advanced',
-        commonTopics: ['ArrayList', 'HashMap', 'Generics', 'Checked exceptions', 'Threading']
-      } : selectedLanguage === 'C++' ? {
-        focusAreas: ['Memory management', 'STL containers', 'Templates', 'Exception handling', 'Performance optimization'],
-        difficulty: 'Advanced',
-        commonTopics: ['Pointers', 'Smart pointers', 'RAII', 'Move semantics', 'STL algorithms']
-      } : {
-        focusAreas: ['Core concepts', 'Best practices', 'Performance considerations'],
-        difficulty: 'Varies',
-        commonTopics: ['Fundamentals', 'Advanced concepts', 'Best practices']
-      }
-    },
-    parentId: interviewContextId
-  });
+ 
 
   // Provide recent performance context
   useCopilotReadable({
@@ -1021,21 +644,7 @@ export default function InterviewApp() {
     setHasHydrated(true);
   }, [setHasHydrated]);
 
-  // Dynamic suggestions for the popup chat based on real-time interview state
-  useCopilotChatSuggestions(
-    {
-      instructions:
-        `You are generating plain-text button suggestions for an assistant popup. ` +
-        `The goal is to guide the user toward understanding and a solution with high-signal prompts. ` +
-        `Prefer concise labels that elicit detailed, explanatory responses when clicked. ` +
-        `Examples: Hint, Approach Outline, Step-by-Step, Explain Concept, Real-Life Example, Edge Cases, Complexity & Trade-offs, Debugging Tips, Test Cases, Compare Solutions, Optimize Solution, Constraints Review. ` +
-        `Selected subject: ${selectedLanguage || 'unknown'}. ` +
-        `Incorporate recent performance and progress to tailor the level of detail.`,
-      minSuggestions: 1,
-      maxSuggestions: 3,
-    },
-    [selectedLanguage, responses.length, isInterviewActive, getAverageScore()]
-  );
+  
   
   if (!_hasHydrated) {
     return (
@@ -1048,47 +657,12 @@ export default function InterviewApp() {
     );
   }
 
+  
+
   return (
     <CopilotKit runtimeUrl="/api/copilotkit">
-      <div className="min-h-screen animated-bg dark:animated-bg">
-        {/* Header */}
-        <header className="sticky top-0 z-40 w-full border-b border-[var(--chat-border)] bg-white/70 dark:bg-gray-900/80 backdrop-blur-lg">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between text-[var(--apple-text)] dark:text-[#E0E0E0]">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-lg" style={{background: 'linear-gradient(135deg,var(--apple-accent),var(--apple-accent-2))'}}>
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-[var(--apple-accent)] to-[var(--apple-accent-2)] bg-clip-text text-transparent">
-                InterviewXP
-              </h1>
-            </div>
-            
-            {isInterviewActive && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  onClick={() => setShowTopicSelector(true)}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
-                >
-                  <Code className="w-4 h-4" />
-                  <span>Change Topic</span>
-                </Button>
-                <Button
-                  onClick={handleResetInterview}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Reset Interview</span>
-                </Button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Main Content */}
+              <div className="min-h-screen animated-bg dark:animated-bg">
+          {/* Main Content */}
         <main className="container mx-auto px-4 py-8 text-[var(--apple-text)] dark:text-[#E0E0E0]">
           <AnimatePresence mode="wait">
             {!isInterviewActive ? (
@@ -1187,7 +761,7 @@ export default function InterviewApp() {
                 className="max-w-6xl mx-auto"
               >
                 {/* Gemini-like Interview Chat - full width/height */}
-                <div className="space-y-4">
+                <div className="space-y-6 pt-12">
                   <div className="flex items-center justify-between">
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
@@ -1220,6 +794,33 @@ export default function InterviewApp() {
                       >
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Get Help
+                      </Button>
+                      <Button
+                        onClick={() => setShowTopicSelector(true)}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                      >
+                        <Code className="w-4 h-4" />
+                        <span>Change Topic</span>
+                      </Button>
+                      <Button
+                        onClick={handleResetInterview}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Reset Interview</span>
+                      </Button>
+                      <Button
+                        onClick={() => { window.location.href = '/' }}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                      >
+                        <Home className="w-4 h-4" />
+                        <span>Home</span>
                       </Button>
                     </div>
                   </div>
@@ -1269,7 +870,7 @@ export default function InterviewApp() {
                                 }}
                                 className="w-full"
                                 Input={InterviewerChatInput}
-                                RenderSuggestionsList={ChatSuggestionsList}
+                               
                               />
                             </div>
                           </div>
@@ -1284,36 +885,28 @@ export default function InterviewApp() {
         </main>
 
 
+
         {/* AI Assistant Popup (CopilotPopup) */}
         {isInterviewActive && (
           <div
-            style={
-              {"--copilot-kit-primary-color": "#10a37f", // ChatGPT's primary green for accents/buttons
-      "--copilot-kit-secondary-color": "#343541", // Slightly lighter dark background for secondary elements
-      "--copilot-kit-accent-color": "#19c37d", // A brighter green accent
-      "--copilot-kit-background-color": "#FFFFFF", // Main dark background
-      "--copilot-kit-text-color": "#ececf1", // Light text color for contrast on dark background
-      "--copilot-kit-border-color": "#40414f", // Subtle border/divider color
-      "--copilot-kit-shadow": "0 4px 32px 0 rgba(0, 0, 0, 0.5)", // Stronger shadow for depth on dark
-      "--copilot-kit-border-radius": "12px", // Consistent with ChatGPT's rounded corners
-      "--copilot-kit-font-family": "'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
-      "--copilot-kit-popup-width": "480px",
-      "--copilot-kit-popup-height": "600px",
-      "--copilot-kit-popup-max-width": "95vw",
-      "--copilot-kit-popup-max-height": "90vh",
-              } as CopilotKitCSSProperties
-            }
+            id="popup"
+            style={{
+              background: componentColors["popup"] || "#fff",
+              borderRadius: 20,
+              transition: 'background 0.4s',
+            }}
           >
             <CopilotKit runtimeUrl='/api/copilotkit'>
               <CopilotPopup  
-              instructions={ASSISTANT_PROMPT}
-              labels={{
-                title: `${selectedLanguage} Interview Assistant`,
-                initial: `Hi! I'm your ${selectedLanguage} interview assistant. I can provide hints, explain concepts, give short code as plain text, break down problems, and suggest approaches. Ask for help with any question you're working on.`,
-                placeholder: 'Ask for hints, explanations, or help...',
-              }}
-              defaultOpen={isPopupOpen}
-            />
+                instructions={ASSISTANT_PROMPT}
+                labels={{
+                  title: `${selectedLanguage} Interview Assistant`,
+                  initial: `Hi! I'm your ${selectedLanguage} interview assistant. I can provide hints, explain concepts, give short code as plain text, break down problems, and suggest approaches. Ask for help with any question you're working on.`,
+                  placeholder: 'Ask for hints, explanations, or help...',
+                }}
+                defaultOpen={isPopupOpen}
+              
+              />
             </CopilotKit>
           </div>
           
@@ -1321,61 +914,70 @@ export default function InterviewApp() {
         
         {/* Topic Selection Modal */}
         {showTopicSelector && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[var(--apple-card)] dark:bg-[#2C2C2E] rounded-2xl p-6 max-w-md w-full mx-4 border border-[var(--chat-border)] shadow-2xl"
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-[var(--apple-card)] dark:bg-[#2C2C2E] rounded-2xl p-4 max-w-md w-full mx-4 border border-[var(--chat-border)] shadow-2xl"
+      >
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold text-[var(--apple-text)] dark:text-white mb-1">
+            Change Interview Topic
+          </h3>
+          <p className="text-[var(--apple-subtext)] dark:text-gray-300 text-xs">
+            Select a new topic to continue your interview practice
+          </p>
+        </div>
+    
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {[
+            { name: 'JavaScript', icon: '⚡' },
+            { name: 'Python', icon: '🐍' },
+            { name: 'Java', icon: '☕' },
+            { name: 'C++', icon: '⚙️' },
+            { name: 'TypeScript', icon: '🔵' },
+            { name: 'Go', icon: '🐹' },
+            { name: 'Rust', icon: '🦀' },
+            { name: 'SQL', icon: '🗄️' },
+            { name: 'React', icon: '⚛️' },
+            { name: 'Next.js', icon: '▲' },
+            { name: 'Node.js', icon: '🟢' },
+            { name: 'Data Science', icon: '📊' },
+            { name: 'ML', icon: '🤖' },
+            { name: 'NLP', icon: '🗣️' },
+            { name: 'App Development', icon: '📱' },
+            { name: 'DSA', icon: '🧠' },
+            { name: 'OOP', icon: '🧩' },
+            { name: 'CN', icon: '🌐' },
+            { name: 'DBMS', icon: '🗃️' },
+            { name: 'SE', icon: '⚙️' },
+            { name: 'OS', icon: '💻' }
+          ].map((topic) => (
+            <button
+              key={topic.name}
+              onClick={() => handleChangeTopic(topic.name)}
+              className="flex flex-col items-center p-2 rounded-xl border border-[var(--chat-border)] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-center"
             >
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-[var(--apple-text)] dark:text-white mb-2">
-                  Change Interview Topic
-                </h3>
-                <p className="text-[var(--apple-subtext)] dark:text-gray-300 text-sm">
-                  Select a new topic to continue your interview practice
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {[
-                  { name: 'JavaScript', icon: '⚡' },
-                  { name: 'Python', icon: '🐍' },
-                  { name: 'Java', icon: '☕' },
-                  { name: 'C++', icon: '⚙️' },
-                  { name: 'React', icon: '⚛️' },
-                  { name: 'Node.js', icon: '🟢' },
-                  { name: 'Data Science', icon: '📊' },
-                  { name: 'DBMS', icon: '🗄️' },
-                  { name: 'System Design', icon: '🏗️' },
-                  { name: 'Algorithms', icon: '🧮' },
-                  { name: 'Machine Learning', icon: '🤖' },
-                  { name: 'DevOps', icon: '🔧' }
-                ].map((topic) => (
-                  <button
-                    key={topic.name}
-                    onClick={() => handleChangeTopic(topic.name)}
-                    className="flex flex-col items-center p-4 rounded-xl border border-[var(--chat-border)] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <span className="text-2xl mb-2">{topic.icon}</span>
-                    <span className="text-sm font-medium text-[var(--apple-text)] dark:text-white">
-                      {topic.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => setShowTopicSelector(false)}
-                  variant="outline"
-                  className="border-[var(--chat-border)] text-[var(--apple-text)] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </motion.div>
-          </div>
+              <span className="text-xl mb-1">{topic.icon}</span>
+              <span className="text-xs font-medium text-[var(--apple-text)] dark:text-white leading-tight">
+                {topic.name}
+              </span>
+            </button>
+          ))}
+        </div>
+    
+        <div className="flex justify-end">
+          <Button
+            onClick={() => setShowTopicSelector(false)} 
+            variant="outline"
+            className="px-3 py-1.5 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"
+          >
+            Cancel
+          </Button>
+        </div>
+      </motion.div>
+    </div>
         )}
         
       </div>
