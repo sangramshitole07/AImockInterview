@@ -1,306 +1,195 @@
-# InterviewXP - Gemini AI-Powered Technical Interview Practice
+🚀 InterviewXP: AI-Powered Technical Interview Simulator
+InterviewXP is an advanced, interactive web application designed to help users master their technical interviews. Leveraging Google's Gemini Pro LLM and CopilotKit, it provides a dynamic interview experience with a dedicated AI Interviewer and a supportive AI Assistant.
 
-A comprehensive technical interview practice application powered by Google's Gemini AI, featuring a modular architecture with dynamic question generation and adaptive difficulty adjustment.
+✨ Features
+Adaptive Interviewer: An AI interviewer that asks dynamic, contextually relevant questions based on your chosen subject and adapts difficulty based on your self-rated proficiency and performance.
 
-## 🎯 Features
+Comprehensive Subjects: Practice across a wide range of topics including JavaScript, Python, Java, C++, Go, TypeScript, Rust, SQL, React, Next.js, Node.js, Data Science, ML, NLP, App Development, DSA, OOP, CN, DBMS, SE, OS.
 
-- **Modular Architecture**: Clean separation of concerns with independent, reusable modules
-- **Dynamic Question Generation**: Gemini-powered adaptive questions based on trending topics
-- **Intelligent Skill Assessment**: Automatic difficulty adjustment based on user performance
-- **Multiple Programming Languages**: Java, Python, JavaScript, C++, TypeScript, Go, Rust, SQL
-- **Consistent Question Formats**: MCQs, Code Analysis, Code Completion, DSA Challenges
-- **Real-time Feedback**: Instant scoring and detailed explanations
-- **User Profile Management**: Persistent skill tracking and interview history
-- **Modern UI**: Beautiful, responsive interface with animations
+Multiple Question Formats: Engages users with various question types:
 
-## 🏗️ Modular Architecture
+🚀 MCQ (Multiple Choice Questions)
 
-### Core Modules
+📝 Code Snippet Analysis
 
-#### 1. **Chat Module** (`lib/modules/chat/`)
-- Manages conversation flow with Gemini AI
-- Handles session state transitions (language selection → skill assessment → interviewing)
-- Processes user responses and generates appropriate AI responses
-- Integrates with other modules for comprehensive interview experience
+🔧 Code Completion
 
-#### 2. **Question Generation Engine** (`lib/modules/question-generation/`)
-- Generates dynamic, contextual questions using Gemini AI
-- Incorporates trending topics and modern programming practices
-- Adapts difficulty based on user skill level and performance
-- Maintains consistent question formats across all languages
+🧠 DSA Challenges
 
-#### 3. **User Profile Module** (`lib/modules/user-profile/`)
-- Manages user preferences and interview history
-- Tracks skill levels and performance metrics
-- Provides persistent storage for user data
-- Generates performance insights and recommendations
+Real-time Feedback: Provides structured feedback and a score out of 10 after each answer, highlighting strengths and areas for improvement.
 
-#### 4. **Feedback & Scoring Engine** (`lib/modules/feedback-scoring/`)
-- Analyzes user responses using advanced AI techniques
-- Provides detailed, constructive feedback
-- Calculates performance metrics and trends
-- Generates personalized improvement suggestions
+Intelligent AI Assistant: A separate popup assistant offers contextual hints, concept explanations, and real-life examples without giving away direct answers.
 
-#### 5. **Module Orchestrator** (`lib/modules/index.ts`)
-- Coordinates interactions between all modules
-- Manages application state and session lifecycle
-- Provides unified API for component integration
-- Handles module initialization and cleanup
+Seamless Chat UI: Utilizes CopilotKit's chat components for a smooth, Gemini Pro-like conversational interface with proper Markdown rendering for code snippets and feedback.
 
-## 🔄 Dynamic Interview Flow
+Performance Tracking: Monitors interview progress, average scores, and recent performance.
 
-### 1. **Language Selection Phase**
-```
-AI: "Which programming language would you like to use for this interview?"
-User: "JavaScript"
-AI: "Great choice! JavaScript is excellent for web development..."
-```
+Responsive Design: Optimized for a great user experience across all devices.
 
-### 2. **Skill Assessment Phase**
-```
-AI: "On a scale from 1 (beginner) to 5 (expert), how would you rate your proficiency in JavaScript?"
-User: "3"
-AI: "Perfect! I've noted you're at intermediate level. Let me start with appropriate questions..."
-```
+🛠️ Tech Stack
+Framework: Next.js (App Router)
 
-### 3. **Dynamic Interview Phase**
-- Questions adapt based on:
-  - Selected programming language
-  - User's stated skill level (1-5)
-  - Performance on previous questions
-  - Current trending topics in the language
-  - Time spent on responses
+AI Integration: CopilotKit (@copilotkit/react-ui, @copilotkit/react-core, @copilotkit/backend, @copilotkit/google-generative-ai-adapter)
 
-### 4. **Consistent Question Formats**
-All questions follow these exact formats for UI parsing:
+Large Language Model: Google Gemini (gemini-2.0-flash)
 
-**🚀 MCQ Format:**
-```
-🚀 **[Language] Interview Question #[Number]**
-[Question with context]
-```javascript
-[Code snippet if applicable]
-```
-**Choose the best answer:**
-🅰️ A) [Option A]
-🅱️ B) [Option B] 
-🅲️ C) [Option C]
-🅳️ D) [Option D]
-💡 *Hint: [Helpful hint]*
-```
+Styling: Tailwind CSS
 
-**📝 Code Analysis Format:**
-```
-📝 **Code Analysis Challenge**
-```javascript
-[Code snippet to analyze]
-```
-**Question:** [Specific analysis question]
-```
+Animations: Framer Motion
 
-**🔧 Code Completion Format:**
-```
-🔧 **Complete the Code**
-```javascript
-[Partial code with TODO/placeholder]
-```
-**Requirements:** [Clear completion requirements]
-```
+State Management: React Hooks (useState, useEffect, useCallback, useRef) and a custom useInterviewState hook.
 
-**🧠 DSA Challenge Format:**
-```
-🧠 **Algorithm Challenge**
-**Problem:** [Problem statement]
-**Input:** [Input format]
-**Output:** [Output format]  
-**Example:** [Sample input/output]
-```
+Icons: Lucide React
 
-## 🚀 Getting Started
+🚀 Getting Started
+Follow these instructions to set up and run the project locally.
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+Prerequisites
+Node.js (v18.x or higher)
 
-### Installation
-```bash
-# Clone the repository
-git clone <repository-url>
-cd interviewxp
+npm (v8.x or higher)
 
-# Install dependencies
+A Google Gemini API Key (obtainable from Google AI Studio)
+
+Installation
+Clone the repository:
+
+git clone [your-repo-url]
+cd InterviewXP
+
+Install dependencies:
+
 npm install
 
-# Start the development server
-npm run dev
-```
+Environment Variables
+Create a .env.local file in the root of your project and add your API keys:
 
-### Environment Setup
-Create a `.env.local` file with your Gemini AI and service credentials:
-```env
-# === Gemini AI Key ===
-GEMINI_API_KEY=your_gemini_api_key_here
+# .env.local
 
-# === Weaviate Vector DB ===
-WEAVIATE_URL=your_weaviate_cluster_url
-WEAVIATE_GRPC_URL=your_weaviate_grpc_url
-WEAVIATE_API_KEY=your_weaviate_api_key
+# === Google Gemini AI Key ===
+GEMINI_API_KEY="YOUR_GOOGLE_GEMINI_API_KEY"
+
+# === CopilotKit Public API Key (if using CopilotKit's hosted services, otherwise runtimeUrl is used) ===
+# NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY="YOUR_COPILOTKIT_PUBLIC_API_KEY"
+
+# === Weaviate Vector DB (Optional, if integrating for advanced context) ===
+# WEAVIATE_URL="YOUR_WEAVIATE_URL"
+# WEAVIATE_GRPC_URL="YOUR_WEAVIATE_GRPC_URL"
+# WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY"
 
 # === LangChain Related (optional for tracing) ===
-LANGCHAIN_API_KEY=your_langchain_api_key
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_PROJECT=InterviewXP
+# LANGCHAIN_API_KEY="YOUR_LANGCHAIN_API_KEY"
+# LANGCHAIN_TRACING_V2=true
+# LANGCHAIN_PROJECT=InterviewXP
 
-# === General App ===
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY=your_copilot_public_key
-```
+Important: Replace "YOUR_GOOGLE_GEMINI_API_KEY" with your actual API key.
 
-## 📁 Project Structure
+Running the Application
+Start the development server:
 
-```
+npm run dev
+
+Open your browser and navigate to http://localhost:3000.
+
+💡 Usage
+The application features two main AI interfaces:
+
+AI Interviewer (Main Chat):
+
+Located in the central part of the screen.
+
+Start: Select a language/subject from the homepage. The interviewer will then ask for your proficiency rating (1-10).
+
+Interaction: Type your answers in the input box. The AI will provide feedback and the next question.
+
+Dynamic Questions: Questions are generated on-the-fly, adapting to your performance and selected topic.
+
+AI Assistant (Floating Popup):
+
+Click the "Get Help" button to open the floating popup.
+
+Contextual Help: Ask the assistant for hints, concept explanations, or code examples related to the current interview question.
+
+Guidance: The assistant will guide you towards the answer without directly providing it.
+
+📂 Project Structure (Industry Standard)
+The project is structured for clarity, maintainability, and scalability, crucial for Gen AI applications.
+
 project/
-├── lib/modules/                   # Core modular architecture
-│   ├── types.ts                  # Shared TypeScript interfaces
-│   ├── user-profile/             # User management module
-│   ├── question-generation/      # Dynamic question engine
-│   ├── feedback-scoring/         # AI-powered feedback system
-│   ├── chat/                     # Conversation management
-│   └── index.ts                  # Module orchestrator
-├── components/modules/            # Modular UI components
-│   ├── ModularChatInterface.tsx  # Main chat interface
-│   └── ModularInterviewStats.tsx # Performance dashboard
 ├── app/
-│   ├── api/copilotkit/route.ts    # Gemini AI API endpoints
-│   ├── globals.css                # Global styles
-│   ├── layout.tsx                 # Root layout
-│   └── page.tsx                   # Main application
+│   ├── api/
+│   │   └── copilotkit/
+│   │       └── route.ts             # Central CopilotKit API endpoint (handles both AI roles)
+│   ├── layout.tsx                 # Root layout for your Next.js app
+│   └── page.tsx                   # Main application component (InterviewApp)
 ├── components/
-│   ├── CopilotSuggestions.tsx     # AI-powered suggestions
-│   ├── LanguageSelector.tsx       # Language selection
-│   └── ui/                        # UI components
+│   ├── ui/                        # Shadcn UI components (Button, Card, etc.)
+│   │   └── ...
+│   ├── LanguageSelector.tsx       # Component for language selection buttons
+│   ├── InterviewStats.tsx         # Displays interview statistics
+│   ├── CustomSuggestionsList.tsx  # Custom component for rendering AI suggestions (buttons)
+│   │                                # (Used by both CopilotChat and CopilotPopup)
+│   └── ... (other reusable UI components)
 ├── hooks/
-│   └── use-interview-state.ts     # Interview state management
-└── lib/
-    └── utils.ts                   # Utility functions
-```
+│   ├── use-interview-state.ts     # Custom hook for managing overall interview state
+│   └── ... (other custom React hooks)
+├── lib/
+│   ├── weaviate.ts                # (Optional) Weaviate client and interaction logic
+│   ├── prompts.ts                 # Centralized definitions for INTERVIEWER_PROMPT & ASSISTANT_PROMPT
+│   └── ... (other utility functions)
+├── types/
+│   ├── index.d.ts                 # TypeScript type definitions/interfaces
+│   └── ...
+├── public/
+│   └── ... (static assets)
+├── styles/
+│   ├── globals.css                # Global CSS (Tailwind CSS base styles, custom code block styling)
+│   └── ...
+├── .env.local                     # Environment variables (NEVER commit to Git)
+├── next.config.js                 # Next.js configuration (webpack, dynamic routes)
+├── package.json                   # Project dependencies and scripts
+├── tsconfig.json                  # TypeScript configuration
+└── ...
 
-## 🔧 Module Integration
+🧠 AI Prompts (Core AI Logic)
+The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected.
 
-### Component Usage Example:
-```typescript
-import { moduleOrchestrator, chatModule } from '@/lib/modules';
+INTERVIEWER_PROMPT: Guides the main chat to conduct structured interviews, adapt difficulty, provide detailed feedback, and generate relevant questions.
 
-// Initialize the system
-await moduleOrchestrator.initialize();
+ASSISTANT_PROMPT: Guides the popup assistant to offer contextual hints, explanations, and examples without giving direct answers.
 
-// Start new interview session
-const welcomeMessage = await moduleOrchestrator.startNewSession();
+🐛 Troubleshooting
+ReferenceError: window is not defined: Ensure browser-specific code (like window access) is inside useEffect hooks.
 
-// Process user messages
-const response = await chatModule.processMessage(userInput);
-```
+Module not found: Can't resolve 'encoding': Add webpack fallback for encoding: false in next.config.js.
 
-### Module Communication:
-```typescript
-// Modules communicate through the orchestrator
-const sessionStatus = moduleOrchestrator.getSessionStatus();
-// Returns: { hasProfile, language, skillLevel, sessionState, isActive }
+Error: Invariant: headers() expects to have requestAsyncStorage, none available.: Remove output: 'export' from next.config.js and ensure export const dynamic = 'force-dynamic'; in API routes.
 
-// Each module maintains its own state but shares data through interfaces
-const userStats = userProfileModule.getStats();
-const questionContext = questionGenerationModule.getTrendingTopics(language);
-```
+Error: Element type is invalid... or Missing required prop: 'runtimeUrl': Confirm <CopilotKit runtimeUrl="/api/copilotkit"> is the single top-level wrapper, and no nested CopilotKit instances exist.
 
-## 🎨 UI Components
+GraphQLError: An unexpected error occurred:
 
-The application uses a modern, responsive design with:
-- **Gradient backgrounds** and smooth animations
-- **Card-based layouts** for clear information hierarchy
-- **Interactive buttons** with hover effects
-- **Real-time feedback** with scoring and progress tracking
-- **Adaptive suggestions** based on performance
+Verify GEMINI_API_KEY: Check .env.local for correctness. Restart server.
 
-## 🤖 AI Integration
+Test Gemini API Directly: Use a standalone script to confirm your API key and model (gemini-2.0-flash) are functional.
 
-### Dynamic Prompt Generation
-The system generates contextual prompts based on:
-- User's selected programming language
-- Current skill level assessment
-- Previous question performance
-- Trending topics in the technology space
-- Session duration and engagement
+Check Server Logs: Look for more detailed error messages from the Gemini API in your terminal where npm run dev is running.
 
-### Adaptive Difficulty System
-```typescript
-// Questions automatically adjust based on performance
-if (averageScore >= 8) {
-  // Increase complexity and depth
-  difficulty = 'Hard';
-  includeAdvancedConcepts = true;
-} else if (averageScore < 6) {
-  // Provide more guidance and simpler concepts  
-  difficulty = 'Easy';
-  includeHints = true;
-}
-```
+Jittery Scrolling in CopilotChat: Ensure the parent Card has a fixed height (e.g., h-[70vh]) and the direct wrapper of CopilotChat has flex-1 overflow-auto.
 
-## 🔧 Configuration
+🤝 Contributing
+Contributions are welcome! Please feel free to open issues or submit pull requests.
 
-### Language Support
-Currently supports:
-- JavaScript (ES6+, async programming)
-- Python (Pythonic code, decorators)
-- Java (OOP, collections framework)
-- C++ (memory management, STL)
-- TypeScript (type system, generics)
-- Go (goroutines, channels)
-- Rust (ownership, lifetimes)
-- SQL (joins, optimization)
+📄 License
+This project is open-source and available under the MIT License.
 
-### Trending Topics Integration
-Each language maintains a curated list of trending topics that influence question generation:
-- **JavaScript**: React Server Components, Next.js 14, TypeScript 5.0, Vite, WebAssembly
-- **Python**: FastAPI, Pydantic v2, AsyncIO, Type Hints, LangChain, MLOps
-- **Java**: Spring Boot 3, Virtual Threads, GraalVM, Project Loom, Java 21 LTS
-- **And more...**
+🙏 Acknowledgements
+CopilotKit for the AI UI framework.
 
-## 🚀 Deployment
+Google Gemini API for the powerful LLM.
 
-### Vercel (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
+Next.js for the React framework.
 
-# Deploy
-vercel
-```
+Tailwind CSS for utility-first styling.
 
-### Other Platforms
-The application can be deployed to any platform that supports Next.js:
-- Netlify
-- Railway
-- DigitalOcean App Platform
-- AWS Amplify
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Animations powered by [Framer Motion](https://www.framer.com/motion/)
-- AI integration via [CopilotKit](https://copilotkit.ai/)
-- Powered by [Google Gemini AI](https://ai.google.dev/)
-- Vector database by [Weaviate](https://weaviate.io/)
-- AI orchestration with [LangChain](https://langchain.com/)
+Lucide React for beautiful icons.
