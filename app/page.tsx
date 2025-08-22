@@ -9,15 +9,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
 import '@copilotkit/react-ui/styles.css';
 import { CopilotKitCSSProperties, RenderSuggestionsListProps, InputProps, RenderSuggestion, useCopilotChatSuggestions } from "@copilotkit/react-ui";
-import { useSearchParams } from 'next/navigation';
  
 import { useInterviewState } from '@/hooks/use-interview-state';
-import { useAuth } from '@/hooks/use-auth';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { CopilotSuggestions } from '@/components/CopilotSuggestions'; // Assuming this is correct
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info, Home, User, LogIn, UserPlus, BarChart3 } from 'lucide-react';
+import { Brain, Code, MessageSquare, RefreshCw, Sparkles, Trophy, Target, Clock, BookOpen, ArrowRight, Info, Home } from 'lucide-react';
 
 // =============================================================================
 // AI Prompts
@@ -338,8 +336,6 @@ function InterviewerChatInput({ inProgress, onSend, isVisible }: InputProps) {
 // =============================================================================
 
 export default function InterviewApp() {
-  const { user, isAuthenticated, _hasHydrated } = useAuth();
-  const searchParams = useSearchParams();
   const { 
     isInterviewActive, 
     selectedLanguage, 
@@ -347,8 +343,8 @@ export default function InterviewApp() {
     resetInterview,
     responses,
     getAverageScore,
-    _hasHydrated: interviewHydrated,
-    setHasHydrated: setInterviewHydrated
+    _hasHydrated,
+    setHasHydrated
   } = useInterviewState();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -358,14 +354,6 @@ export default function InterviewApp() {
   const [popupBg, setPopupBg] = useState<string>("#fff");
   // 1. Add state for component colors
   const [componentColors, setComponentColors] = useState<{ [key: string]: string }>({});
-
-  // Check for language parameter from dashboard
-  useEffect(() => {
-    const langParam = searchParams.get('lang');
-    if (langParam && !isInterviewActive) {
-      handleLanguageSelection(langParam);
-    }
-  }, [searchParams]);
 
   // 2. Register Copilot action for changing component color
   useCopilotAction({
@@ -653,12 +641,12 @@ export default function InterviewApp() {
   }, [startInterview, toast]);
 
   useEffect(() => {
-    setInterviewHydrated(true);
-  }, [setInterviewHydrated]);
+    setHasHydrated(true);
+  }, [setHasHydrated]);
 
   
   
-  if (!_hasHydrated || !interviewHydrated) {
+  if (!_hasHydrated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
@@ -674,65 +662,8 @@ export default function InterviewApp() {
   return (
     <CopilotKit runtimeUrl="/api/copilotkit">
               <div className="min-h-screen animated-bg dark:animated-bg">
-          {/* Navigation Header */}
-          <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-            <div className="container mx-auto px-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900">InterviewXP</h1>
-                    <p className="text-sm text-gray-600">AI-Powered Interview Practice</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  {isAuthenticated && user ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.location.href = '/dashboard'}
-                        className="flex items-center space-x-2"
-                      >
-                        <BarChart3 className="w-4 h-4" />
-                        <span>Dashboard</span>
-                      </Button>
-                      <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
-                        <User className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-900">{user.name}</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.location.href = '/login'}
-                        className="flex items-center space-x-2"
-                      >
-                        <LogIn className="w-4 h-4" />
-                        <span>Login</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => window.location.href = '/signup'}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white flex items-center space-x-2"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        <span>Sign Up</span>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </header>
-
           {/* Main Content */}
-        <main className="container mx-auto px-4 py-8 text-[var(--apple-text)] dark:text-[#E0E0E0] pt-8">
+        <main className="container mx-auto px-4 py-8 text-[var(--apple-text)] dark:text-[#E0E0E0]">
           <AnimatePresence mode="wait">
             {!isInterviewActive ? (
               <motion.div
@@ -882,17 +813,15 @@ export default function InterviewApp() {
                         <RefreshCw className="w-4 h-4" />
                         <span>Reset Interview</span>
                       </Button>
-                      {isAuthenticated && (
-                        <Button
-                          onClick={() => { window.location.href = '/dashboard' }}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
-                        >
-                          <BarChart3 className="w-4 h-4" />
-                          <span>Dashboard</span>
-                        </Button>
-                      )}
+                      <Button
+                        onClick={() => { window.location.href = '/' }}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2 border-[var(--chat-border)] text-[var(--apple-text)] dark:text-[#E0E0E0] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
+                      >
+                        <Home className="w-4 h-4" />
+                        <span>Home</span>
+                      </Button>
                     </div>
                   </div>
 

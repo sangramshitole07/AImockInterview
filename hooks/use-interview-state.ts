@@ -2,7 +2,6 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useAuth } from './use-auth';
 
 export interface InterviewResponse {
   question: string;
@@ -69,29 +68,6 @@ export const useInterviewState = create<InterviewStore>()(
           totalScore: state.totalScore + response.score,
           responses: [...state.responses, newResponse],
         });
-        
-        // Record interview data if user is authenticated
-        if (typeof window !== 'undefined') {
-          try {
-            const authState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
-            if (authState?.state?.isAuthenticated && state.selectedLanguage) {
-              fetch('/api/user/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  language: state.selectedLanguage,
-                  score: response.score,
-                  questionsAnswered: 1,
-                  skillRatings: {
-                    [state.selectedLanguage]: response.score,
-                  },
-                }),
-              }).catch(console.error);
-            }
-          } catch (error) {
-            console.error('Failed to record interview data:', error);
-          }
-        }
       },
       
       resetInterview: () => {
