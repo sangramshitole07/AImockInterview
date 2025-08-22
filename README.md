@@ -123,48 +123,7 @@ Contextual Help: Ask the assistant for hints, concept explanations, or code exam
 
 Guidance: The assistant will guide you towards the answer without directly providing it.
 
-📂 Project Structure (Industry Standard)
-The project is structured for clarity, maintainability, and scalability, which are crucial for complex Gen AI applications. This organization helps isolate concerns, simplifies debugging, and streamlines future development.
 
-project/
-├── app/
-│   ├── api/
-│   │   └── copilotkit/
-│   │       └── route.ts             # Central CopilotKit API endpoint (handles both AI roles)
-│   ├── layout.tsx                 # Root layout for your Next.js app
-│   └── page.tsx                   # Main application component (where InterviewApp is rendered)
-├── components/
-│   ├── ui/                        # Shadcn UI components (e.g., Button, Card)
-│   │   ├── button.tsx
-│   │   └── card.tsx
-│   │   └── ... (other Shadcn UI components)
-│   ├── LanguageSelector.tsx       # Component for selecting interview language buttons
-│   ├── InterviewStats.tsx         # Displays interview statistics (e.g., score, questions answered)
-│   ├── CustomSuggestionsList.tsx  # Custom component for rendering AI suggestions (e.g., clickable buttons)
-│   │                                # (Used by both CopilotChat and CopilotPopup)
-│   └── ... (other reusable UI components specific to your app)
-├── hooks/
-│   ├── use-interview-state.ts     # Custom React hook for managing overall interview state (e.g., selected language, active status, responses)
-│   └── ... (other custom React hooks for specific logic)
-├── lib/
-│   ├── weaviate.ts                # (Optional) Service for interacting with Weaviate (vector DB client, embedding logic)
-│   ├── prompts.ts                 # Centralized definitions for INTERVIEWER_PROMPT & ASSISTANT_PROMPT constants
-│   ├── llm-client.ts              # (Optional) Utility for direct LLM calls if needed outside CopilotKit's flow
-│   └── utils.ts                   # General utility functions (e.g., data formatting, helpers)
-├── types/
-│   ├── index.d.ts                 # TypeScript type definitions and interfaces (e.g., ChatMessage, UserProfile, InterviewState)
-│   └── ... (other specific type definition files)
-├── public/
-│   ├── favicon.ico
-│   └── ... (static assets like images, fonts)
-├── styles/
-│   ├── globals.css                # Global CSS (e.g., Tailwind CSS base styles, custom code block styling)
-│   └── ... (other specific CSS modules or files)
-├── .env.local                     # Environment variables (NEVER commit to Git, contains sensitive API keys)
-├── next.config.js                 # Next.js configuration (e.g., webpack customizations, dynamic route settings)
-├── package.json                   # Project dependencies, scripts, and metadata
-├── tsconfig.json                  # TypeScript configuration for the project
-└── README.md  
 
 🧠 AI Prompts (Core AI Logic)
 The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected. The prompts are centrally defined in lib/prompts.ts.
