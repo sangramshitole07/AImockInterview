@@ -74,23 +74,24 @@ npm install
 Environment Variables
 Create a .env.local file in the root of your project and add your API keys:
 
-# .env.local
 
-# === Google Gemini AI Key ===
+.env.local
+
+=== Google Gemini AI Key ===
 GEMINI_API_KEY="YOUR_GOOGLE_GEMINI_API_KEY"
 
-# === CopilotKit Public API Key (if using CopilotKit's hosted services, otherwise runtimeUrl is used) ===
-# NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY="YOUR_COPILOTKIT_PUBLIC_API_KEY"
+=== CopilotKit Public API Key (if using CopilotKit's hosted services, otherwise runtimeUrl is used) ===
+NEXT_PUBLIC_COPILOT_PUBLIC_API_KEY="YOUR_COPILOTKIT_PUBLIC_API_KEY"
 
-# === Weaviate Vector DB (Optional, if integrating for advanced context) ===
-# WEAVIATE_URL="YOUR_WEAVIATE_URL"
-# WEAVIATE_GRPC_URL="YOUR_WEAVIATE_GRPC_URL"
-# WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY"
+=== Weaviate Vector DB (Optional, if integrating for advanced context) ===
+WEAVIATE_URL="YOUR_WEAVIATE_URL"
+WEAVIATE_GRPC_URL="YOUR_WEAVIATE_GRPC_URL"
+WEAVIATE_API_KEY="YOUR_WEAVIATE_API_KEY"
 
-# === LangChain Related (optional for tracing) ===
-# LANGCHAIN_API_KEY="YOUR_LANGCHAIN_API_KEY"
-# LANGCHAIN_TRACING_V2=true
-# LANGCHAIN_PROJECT=InterviewXP
+=== LangChain Related (optional for tracing) ===
+LANGCHAIN_API_KEY="YOUR_LANGCHAIN_API_KEY"
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=InterviewXP
 
 Important: Replace "YOUR_GOOGLE_GEMINI_API_KEY" with your actual API key.
 
