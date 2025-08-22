@@ -4,7 +4,17 @@ InterviewXP is an advanced, interactive web application designed to help users m
 ✨ Features
 Adaptive Interviewer: An AI interviewer that asks dynamic, contextually relevant questions based on your chosen subject and adapts difficulty based on your self-rated proficiency and performance.
 
-Comprehensive Subjects: Practice across a wide range of topics including JavaScript, Python, Java, C++, Go, TypeScript, Rust, SQL, React, Next.js, Node.js, Data Science, ML, NLP, App Development, DSA, OOP, CN, DBMS, SE, OS.
+Comprehensive Subjects: Practice across a wide range of topics including:
+
+JavaScript, Python, Java, C++, Go, TypeScript, Rust, SQL
+
+React, Next.js, Node.js
+
+Data Science, ML, NLP
+
+App Development, DSA, OOP
+
+CN, DBMS, SE, OS
 
 Multiple Question Formats: Engages users with various question types:
 
@@ -113,7 +123,7 @@ Contextual Help: Ask the assistant for hints, concept explanations, or code exam
 Guidance: The assistant will guide you towards the answer without directly providing it.
 
 📂 Project Structure (Industry Standard)
-The project is structured for clarity, maintainability, and scalability, crucial for Gen AI applications.
+The project is structured for clarity, maintainability, and scalability, which are crucial for complex Gen AI applications. This organization helps isolate concerns, simplifies debugging, and streamlines future development.
 
 project/
 ├── app/
@@ -152,7 +162,7 @@ project/
 └── ...
 
 🧠 AI Prompts (Core AI Logic)
-The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected.
+The intelligence of the application is driven by detailed prompts injected into the Gemini LLM. These prompts define the persona, rules, output formats, and contextual awareness for both the Interviewer and the Assistant. They are critical for ensuring the AI behaves as expected. The prompts are centrally defined in lib/prompts.ts.
 
 INTERVIEWER_PROMPT: Guides the main chat to conduct structured interviews, adapt difficulty, provide detailed feedback, and generate relevant questions.
 
